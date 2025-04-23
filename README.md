@@ -36,8 +36,8 @@ This repository uses GitHub Actions (`.github/workflows/lza_config_ci.yaml`) to 
     *   Runs on every push to any branch and on pull requests targeting `master`.
     *   Checks out the code.
     *   Sets up Python.
-    *   Installs `yamale` (a YAML validation tool).
-    *   Validates all `*.yaml` files within the `config/` directory against the basic schema defined in `schema.yaml`. This ensures the files are well-formed YAML maps.
+    *   Installs `yamllint` (a YAML linter).
+    *   Lints all `*.yaml` files within the `config/` directory using the configuration in `.yamllint.yaml`. This checks for YAML syntax errors and basic style consistency.
 
 2.  **`deploy`**:
     *   Runs **only** on push events to the `master` branch, after the `validate` job succeeds.
