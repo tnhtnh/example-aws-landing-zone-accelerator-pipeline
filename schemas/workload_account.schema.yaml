@@ -1,0 +1,5 @@
+name: str(required=True)
+description: str(required=True)
+email: email(required=True)
+organizationalUnit: str(required=True)
+# 'warm' key is omitted as it's not present in the workload account examples 

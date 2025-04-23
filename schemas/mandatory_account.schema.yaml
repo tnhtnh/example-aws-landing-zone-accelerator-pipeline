@@ -1,0 +1,5 @@
+name: str(required=True)
+description: str(required=True)
+email: email(required=True)
+organizationalUnit: str(required=True)
+warm: bool(required=True) # Based on example, warm is required for mandatory accounts 
