@@ -1,3 +1,0 @@
-# Basic schema for Yamale: Validates that the input is a map (dictionary).
-# Apply this schema to each LZA config file individually.
-map(required=True) 

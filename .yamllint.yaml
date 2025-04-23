@@ -1,0 +1,16 @@
+# .yamllint.yaml
+# Basic configuration for yamllint
+
+extends: default
+
+rules:
+  # LZA config files often have long description lines or complex structures.
+  line-length: disable
+  # Allow comments, including potentially commented-out blocks.
+  comments: disable
+  # Disable document-start check as not all files may require '---'
+  document-start: disable
+
+# Ignore specific files if needed (e.g., non-YAML files accidentally in the directory)
+# ignore: |
+#   /path/to/ignore 
