@@ -92,6 +92,39 @@ jobs:
         env:
           CODEPIPELINE_NAME: ${{ secrets.CODEPIPELINE_NAME }}
         run: |
-          echo "Starting CodePipeline execution for pipeline: ${CODEPIPELINE_NAME}"
-          aws codepipeline start-pipeline-execution --name ${CODEPIPELINE_NAME}
-          echo "Pipeline execution started." 
+          pipeline_name="${CODEPIPELINE_NAME}"
+          echo "Pipeline Name: ${pipeline_name}"
+
+          # Determine AWS Region
+          aws_region=$(aws configure get region || echo $AWS_DEFAULT_REGION || echo $AWS_REGION)
+          if [ -z "${aws_region}" ]; then
+            echo "Warning: AWS Region could not be determined. Assuming us-east-1 for the link."
+            aws_region="us-east-1" # Provide a fallback region
+          fi
+          echo "AWS Region: ${aws_region}"
+
+          echo "Starting CodePipeline execution for pipeline: ${pipeline_name} in region ${aws_region}..."
+          execution_output=$(aws codepipeline start-pipeline-execution --name "${pipeline_name}")
+
+          # Check if the command was successful before proceeding
+          if [ $? -ne 0 ]; then
+            echo "Error starting CodePipeline execution."
+            echo "${execution_output}" # Print error from aws cli
+            exit 1
+          fi
+
+          # Extract execution ID using jq (ensure jq is available on runner or install it)
+          execution_id=$(echo "${execution_output}" | jq -r '.pipelineExecutionId')
+
+          if [ -z "${execution_id}" ] || [ "${execution_id}" == "null" ]; then
+            echo "Error: Could not extract pipelineExecutionId from the output."
+            echo "Output: ${execution_output}"
+            # Decide if this should be a fatal error
+            # exit 1
+            echo "Pipeline execution started, but could not generate direct link."
+          else
+            echo "Pipeline execution started with ID: ${execution_id}"
+            # Construct the URL
+            console_url="https://${aws_region}.console.aws.amazon.com/codesuite/codepipeline/pipelines/${pipeline_name}/executions/${execution_id}/timeline?region=${aws_region}"
+            echo "View Execution Details: ${console_url}"
+          fi 
