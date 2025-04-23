@@ -37,11 +37,24 @@ jobs:
       - name: Install Yamale
         run: pip install yamale PyYAML
 
+      - name: Pre-process YAML files for validation
+        run: |
+          echo "Replacing placeholders in config files for validation..."
+          TEMP_DIR="config-temp-validation"
+          cp -r config "$TEMP_DIR"
+          # Find all .yaml files and replace {{...}} with "PLACEHOLDER" using sed
+          # Note the use of different delimiters for sed to handle '/' in paths
+          find "$TEMP_DIR" -type f -name '*.yaml' -exec sed -i 's#{{[^}]*}}#"PLACEHOLDER"#g' {} +
+          echo "Placeholders replaced in temporary directory $TEMP_DIR."
+
       - name: Validate YAML files
         run: |
           echo "Validating LZA configuration files against schema.yaml..."
-          yamale -s schema.yaml config/*.yaml
+          # Validate the processed files in the temporary directory
+          yamale -s schema.yaml config-temp-validation/*.yaml
           echo "Validation successful."
+          # Clean up the temporary directory (optional, runner cleans up anyway)
+          rm -rf config-temp-validation
 
   deploy:
     name: Deploy to S3 and Trigger Pipeline
