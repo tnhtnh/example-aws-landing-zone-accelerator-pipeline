@@ -44,39 +44,21 @@ serviceControlPolicies:
         - Prod
         - UnClass
         - Sandbox
-  ## IF using Control Tower, remove the following block and uncomment the next block
-  ## BEGIN
-  #- name: AWSAccelerator-Guardrails-Sensitive-Part-1
-  #  description: >
-  #    LZA Guardrails Sensitive Environment Specific Part 1
-  #  policy: service-control-policies/LZA-Guardrails-Sensitive.json
-  #  type: customerManaged
-  #  deploymentTargets:
-  #    organizationalUnits:
-  #      - Security
-  #      - Infrastructure
-  #      - Central
-  #      - Dev
-  #      - Test
-  #      - Prod
-  ## END
-  ## IF using Control Tower, uncomment the following block
-    - name: AWSAccelerator-Guardrails-Sensitive-Part-1
-      description: >
-        LZA Guardrails Sensitive Environment Specific Part 1
-      policy: service-control-policies/LZA-Guardrails-Sensitive.json
-      type: customerManaged
-      deploymentTargets:
-        organizationalUnits:
-          - Infrastructure
-          - Central
-          - Dev
-          - Test
-          - Prod
-        accounts:
-          - Audit
-          - LogArchive
-
+  - name: AWSAccelerator-Guardrails-Sensitive-Part-1
+    description: >
+      LZA Guardrails Sensitive Environment Specific Part 1
+    policy: service-control-policies/LZA-Guardrails-Sensitive.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits:
+        - Infrastructure
+        - Central
+        - Dev
+        - Test
+        - Prod
+      accounts:
+        - Audit
+        - LogArchive
   - name: "{{ AcceleratorPrefix }}-Guardrails-Unclass"
     description: >
       LZA Guardrails Unclassified Environment Specific

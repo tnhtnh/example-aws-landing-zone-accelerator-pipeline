@@ -1,10 +1,10 @@
-homeRegion: {{ AcceleratorHomeRegion }}
+homeRegion: "us-east-1"
 ######
 # Version 1.6.1-a of the configuration introduced this change. If you are upgrading from a previous version,
 # review the Identity Center section of the FAQ in this repository before applying this change.
 identityCenter:
- name: OrgIdentityCenter
- delegatedAdminAccount: Operations
+  name: OrgIdentityCenter
+  delegatedAdminAccount: Operations
 ###
 policySets:
   - deploymentTargets:
@@ -110,11 +110,10 @@ userSets:
         boundaryPolicy: "{{ AcceleratorPrefix }}-IAM-User-Boundary-Policy"
 managedActiveDirectories:
   - name: "{{ AcceleratorPrefix }}ManagedActiveDirectory"
-    type: AWS Managed Microsoft AD
     account: Operations
-    region: {{ AcceleratorHomeRegion }}
-    dnsName: {{ MadDnsName }}
-    netBiosDomainName: {{ MadNetbiosDomainName }}
+    region: "us-east-1"
+    dnsName: "placeholder.dns"
+    netBiosDomainName: "PLACEHOLDERBIOS"
     description: This directory is a) shared to most accounts in the organization to provide centralized Windows and Linux authentication for cloud workloads, b) used as an identity source for AWS SSO, c) used to inter-connect with on-premises directory services, and d) provides a single identities source for instance and AWS console access.
     edition: Enterprise
     vpcSettings:
@@ -125,7 +124,7 @@ managedActiveDirectories:
     resolverRuleName: "{{ AcceleratorPrefix }}-Endpoint-mad-example-local"
     secretConfig:
       account: Operations
-      region: {{ AcceleratorHomeRegion }}
+      region: "us-east-1"
       adminSecretName: my-admin-001
     sharedOrganizationalUnits:
       organizationalUnits:
@@ -136,7 +135,7 @@ managedActiveDirectories:
         - Prod
         - UnClass
     logs:
-      groupName: /AWSAccelerator/MAD/{{MadDnsName}}
+      groupName: /AWSAccelerator/MAD/placeholder.dns
 ## Active Directory Configuration instance need to be deployed after the Managed AD deployment
 ## See post-install instructions
 #    activeDirectoryConfigurationInstance:

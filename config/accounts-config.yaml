@@ -36,4 +36,3 @@ workloadAccounts:
     description: Used for Internet facing, IaaS-based ingress/egress security services
     email: bjsslztest+perimeter@gmail.com
     organizationalUnit: Infrastructure
-

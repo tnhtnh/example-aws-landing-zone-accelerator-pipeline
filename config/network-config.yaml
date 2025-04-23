@@ -4,7 +4,7 @@ defaultVpc:
 transitGateways:
   - name: Network-Main
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     shareTargets:
       organizationalUnits:
         - Infrastructure
@@ -23,11 +23,11 @@ transitGateways:
             attachment:
               vpcName: Perimeter
               account: Perimeter
-          - destinationCidrBlock: {{ VpcDevCidr }}
+          - destinationCidrBlock: { { VpcDevCidr } }
             blackhole: true
-          - destinationCidrBlock: {{ VpcTestCidr }}
+          - destinationCidrBlock: { { VpcTestCidr } }
             blackhole: true
-          - destinationCidrBlock: {{ VpcProdCidr }}
+          - destinationCidrBlock: { { VpcProdCidr } }
             blackhole: true
       - name: Network-Main-Shared
         routes:
@@ -41,14 +41,14 @@ centralNetworkServices:
   delegatedAdminAccount: Network
   ipams:
     - name: accelerator-ipam
-      region: {{ AcceleratorHomeRegion }}
+      region: { { AcceleratorHomeRegion } }
       description: Accelerator IPAM
       operatingRegions:
-        - {{ AcceleratorHomeRegion }}
+        - { { AcceleratorHomeRegion } }
       pools:
         - name: home-region-sandbox-pool
           description: Pool for sandbox environment
-          locale: {{ AcceleratorHomeRegion }}
+          locale: { { AcceleratorHomeRegion } }
           provisionedCidrs:
             - "{{ sandboxCidr }}"
           shareTargets:
@@ -57,7 +57,7 @@ centralNetworkServices:
   networkFirewall:
     firewalls:
       - name: "{{ AcceleratorPrefix }}-firewall"
-        region: {{ AcceleratorHomeRegion }}
+        region: { { AcceleratorHomeRegion } }
         firewallPolicy: "{{ AcceleratorPrefix }}-policy"
         subnets:
           - Perimeter-A
@@ -71,7 +71,7 @@ centralNetworkServices:
     policies:
       - name: "{{ AcceleratorPrefix }}-policy"
         regions:
-          - {{ AcceleratorHomeRegion }}
+          - { { AcceleratorHomeRegion } }
         firewallPolicy:
           statelessDefaultActions: ["aws:forward_to_sfe"]
           statelessFragmentDefaultActions: ["aws:forward_to_sfe"]
@@ -84,7 +84,7 @@ centralNetworkServices:
     rules:
       - name: "{{ AcceleratorPrefix }}-rule-group"
         regions:
-          - {{ AcceleratorHomeRegion }}
+          - { { AcceleratorHomeRegion } }
         capacity: 100
         type: STATEFUL
         ruleGroup:
@@ -93,29 +93,29 @@ centralNetworkServices:
               # Block traffic from Dev/Test VPCs to Prod VPC
               - action: DROP
                 header:
-                  destination: {{ VpcProdCidr }}
+                  destination: { { VpcProdCidr } }
                   destinationPort: ANY
                   direction: ANY
                   protocol: IP
-                  source: {{ VpcDevCidr }}
+                  source: { { VpcDevCidr } }
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
                     settings: ["100"]
               - action: DROP
                 header:
-                  destination: {{ VpcProdCidr }}
+                  destination: { { VpcProdCidr } }
                   destinationPort: ANY
                   direction: ANY
                   protocol: IP
-                  source: {{ VpcTestCidr }}
+                  source: { { VpcTestCidr } }
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
                     settings: ["200"]
       - name: "{{ AcceleratorPrefix }}-domain-list-group"
         regions:
-          - {{ AcceleratorHomeRegion }}
+          - { { AcceleratorHomeRegion } }
         capacity: 10
         type: STATEFUL
         ruleGroup:
@@ -145,13 +145,13 @@ centralNetworkServices:
         type: OUTBOUND
         vpc: Endpoint
         allowedCidrs:
-          - {{ AcceleratorIpamSupernet }}
+          - { { AcceleratorIpamSupernet } }
         subnets:
           - Endpoint-A
           - Endpoint-B
         rules:
           - name: "{{ AcceleratorPrefix }}-Endpoint-mad-example-local"
-            domainName: {{ MadDnsName }}
+            domainName: { { MadDnsName } }
             targetIps:
               - ip: 1.1.1.1
               # port: '5353' # only include if targeting a non-standard DNS port
@@ -170,7 +170,7 @@ centralNetworkServices:
     firewallRuleGroups:
       - name: accelerator-block-group
         regions:
-          - {{ AcceleratorHomeRegion }}
+          - { { AcceleratorHomeRegion } }
         rules:
           - name: managed-rule
             action: BLOCK
@@ -226,9 +226,9 @@ vpcs:
       - key: Name
         value: Endpoint
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcEndpointCidr }}
+      - { { VpcEndpointCidr } }
     defaultSecurityGroupRulesDeletion: true
     internetGateway: false
     enableDnsHostnames: true
@@ -359,9 +359,9 @@ vpcs:
       - key: Name
         value: Perimeter
     account: Perimeter
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcPerimeterCidr }}
+      - { { VpcPerimeterCidr } }
     defaultSecurityGroupRulesDeletion: true
     internetGateway: true
     routeTables:
@@ -379,19 +379,19 @@ vpcs:
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: b
       - name: Perimeter-A
-        routes: 
+        routes:
           - name: IgwRoute
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
       - name: Perimeter-B
-        routes: 
+        routes:
           - name: IgwRoute
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
       - name: Perimeter-Nat-A
-        routes: 
+        routes:
           - name: NfwRoute
             destination: 0.0.0.0/0
             type: networkFirewall
@@ -402,7 +402,7 @@ vpcs:
             type: transitGateway
             target: Network-Main
       - name: Perimeter-Nat-B
-        routes: 
+        routes:
           - name: NfwRoute
             destination: 0.0.0.0/0
             type: networkFirewall
@@ -556,9 +556,9 @@ vpcs:
       - key: Name
         value: Dev
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcDevCidr }}
+      - { { VpcDevCidr } }
     defaultSecurityGroupRulesDeletion: true
     routeTables:
       - name: Dev
@@ -904,9 +904,9 @@ vpcs:
       - key: Name
         value: Central
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcCentralCidr }}
+      - { { VpcCentralCidr } }
     defaultSecurityGroupRulesDeletion: true
     routeTables:
       - name: Central
@@ -1191,9 +1191,9 @@ vpcs:
       - key: Name
         value: Test
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcTestCidr }}
+      - { { VpcTestCidr } }
     defaultSecurityGroupRulesDeletion: true
     routeTables:
       - name: Test
@@ -1504,9 +1504,9 @@ vpcs:
       - key: Name
         value: Prod
     account: Network
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     cidrs:
-      - {{ VpcProdCidr }}
+      - { { VpcProdCidr } }
     defaultSecurityGroupRulesDeletion: true
     routeTables:
       - name: Prod
@@ -1814,7 +1814,7 @@ vpcs:
       - "{{ AcceleratorPrefix }}-Endpoint-mad-example-local"
 vpcTemplates:
   - name: Sandbox-Template
-    region: {{ AcceleratorHomeRegion }}
+    region: { { AcceleratorHomeRegion } }
     deploymentTargets:
       organizationalUnits:
         - Sandbox
