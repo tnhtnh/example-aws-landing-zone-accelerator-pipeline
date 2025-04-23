@@ -1,5 +1,5 @@
 # .github/workflows/preflight.yml
-name: AWS Preflight Checks
+name: Preflight check tests
 
 on:
   push:
@@ -40,23 +40,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          # Replace with the ARN of the IAM role configured for GitHub OIDC
-          role-to-assume: arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/<YOUR_GHA_OIDC_ROLE_NAME>
-          aws-region: ${{ env.AWS_REGION }}
-          # Optional: Specify role session name
-          # role-session-name: GitHubActionsPreflightCheck
-
-      - name: Run Preflight Checks
-        run: python -m preflight_checks.aws_checks
-        # The env block here is only needed if you uncomment the lines below
-        # to override environment variables from secrets/vars.
-        # env:
-          # STACK_PREFIX: ${{ vars.PREFLIGHT_STACK_PREFIX || secrets.PREFLIGHT_STACK_PREFIX || 'AWSAccelerator' }}
-          # CT_HOME_REGION: ${{ vars.CT_HOME_REGION || env.AWS_REGION }}
 
       # Optional: Run Pytest Tests (useful for CI validation)
       - name: Run Unit Tests with Coverage
