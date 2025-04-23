@@ -16,7 +16,7 @@ permissions:
   contents: read # Required to check out the code
 
 jobs:
-  preflight-checks:
+  preflight-code-tests:
     runs-on: ubuntu-latest
     env:
       # Default check region (can be overridden by secrets/vars if needed)

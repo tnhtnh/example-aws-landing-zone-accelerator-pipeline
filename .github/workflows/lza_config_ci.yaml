@@ -59,6 +59,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Check Mandatory Secrets
+        id: check_secrets
+        run: |
+          missing_secrets=""
+          if [ -z "${{ secrets.AWS_OIDC_ROLE_ARN }}" ]; then missing_secrets="AWS_OIDC_ROLE_ARN "; fi
+          if [ -z "${{ secrets.AWS_REGION }}" ]; then missing_secrets="${missing_secrets}AWS_REGION "; fi
+          if [ -z "${{ secrets.S3_BUCKET }}" ]; then missing_secrets="${missing_secrets}S3_BUCKET "; fi
+          if [ -z "${{ secrets.CODEPIPELINE_NAME }}" ]; then missing_secrets="${missing_secrets}CODEPIPELINE_NAME "; fi
+          if [ -z "${{ secrets.LZA_STACK_PREFIX }}" ]; then missing_secrets="${missing_secrets}LZA_STACK_PREFIX "; fi
+
+          if [ -n "$missing_secrets" ]; then
+            echo "::error::Missing mandatory secrets: $missing_secrets"
+            exit 1
+          else
+            echo "All mandatory secrets are present."
+          fi
+
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
