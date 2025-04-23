@@ -16,6 +16,13 @@ on:
       - 'config/**'
       - '.github/workflows/lza_config_ci.yaml'
       - 'schema.yaml'
+  workflow_dispatch:
+    inputs:
+      skip_preflight:
+        description: 'Skip the LZA preflight checks (Only applies to manual runs)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read # Needed to check out the repository
@@ -59,6 +66,8 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }} # Use a secret for the region
 
       - name: Run LZA Preflight Checks
+        # Run if: NOT a manual trigger OR (it IS a manual trigger AND skip_preflight is false)
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_preflight == false
         env:
           LZA_STACK_PREFIX: ${{ secrets.LZA_STACK_PREFIX }} # Use secret for prefix
         run: |

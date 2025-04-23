@@ -1,6 +1,113 @@
-# AWS Preflight Checks
+# AWS Landing Zone Accelerator (LZA) Configuration
 
-This project contains a Python script and associated tests to perform preflight checks against an AWS environment before potential deployments or operations.
+This repository manages the configuration files for deploying an AWS environment using the [Landing Zone Accelerator on AWS (LZA)](https://aws.amazon.com/solutions/implementations/landing-zone-accelerator-on-aws/). It utilizes a GitHub Actions workflow for validation and automated deployment.
+
+## Purpose
+
+*   **Version Control:** Maintain a history of LZA configuration changes.
+*   **Automation:** Automate the validation and deployment of LZA configurations via CI/CD.
+*   **Collaboration:** Facilitate team collaboration on infrastructure configuration.
+
+## Configuration Files (`config/`)
+
+The `config/` directory contains the core YAML files defining your LZA environment. Key files include:
+
+*   `accounts-config.yaml`: Defines AWS accounts and OU placement.
+*   `global-config.yaml`: Contains global settings (regions, Control Tower, logging, etc.).
+*   `iam-config.yaml`: Defines Identity Center, IAM policies, roles, groups, etc.
+*   `network-config.yaml`: Specifies VPCs, Transit Gateway, network services, etc.
+*   `organization-config.yaml`: Defines OU structure, SCPs, tagging policies, etc.
+*   `security-config.yaml`: Configures central security services (GuardDuty, Security Hub, etc.).
+
+Refer to the official [LZA Configuration Documentation](https://docs.aws.amazon.com/solutions/latest/landing-zone-accelerator-on-aws/configuration-files.html) for detailed schema information.
+
+## CI/CD Workflow (`.github/workflows/lza_config_ci.yaml`)
+
+This workflow automates the validation and deployment process.
+
+### Triggers
+
+The workflow runs on:
+
+1.  **Push:** To `master` or any branch when files in `config/`, `schema.yaml`, or the workflow file itself are changed.
+2.  **Pull Request:** Targeting the `master` branch when files in `config/`, `schema.yaml`, or the workflow file are changed.
+3.  **Manual Trigger (`workflow_dispatch`):** Allows running the workflow manually via the GitHub Actions UI.
+    *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped.
+
+### Jobs
+
+1.  **`validate`:**
+    *   Runs on all pushes and pull requests specified in the triggers.
+    *   Checks out the code.
+    *   Installs `yamllint`.
+    *   Lints all YAML files in the `config/` directory to ensure correct syntax and basic style.
+
+2.  **`deploy`:**
+    *   Runs **only** on push events to the `master` branch, after the `validate` job succeeds.
+    *   Checks out the code.
+    *   **Configure AWS Credentials:** Authenticates to AWS using OIDC via an IAM role specified in secrets.
+    *   **Run LZA Preflight Checks (Conditional):**
+        *   Installs Python dependencies from `requirements.txt`.
+        *   Executes the `lza_preflight_check.py` script (checking for failed CloudFormation stacks and Control Tower status).
+        *   **Skipped if:** The workflow was triggered manually (`workflow_dispatch`) **and** the `skip_preflight` input was set to `true`.
+    *   **Zip Configuration Files:** Creates `aws-accelerator-config.zip` containing the contents of the `config/` directory.
+    *   **Upload Config to S3:** Uploads the zip file to the LZA configuration S3 bucket specified in secrets.
+    *   **Trigger CodePipeline:** Starts an execution of the LZA CodePipeline specified in secrets, providing a link to the execution details.
+
+### Required GitHub Secrets
+
+The `deploy` job requires the following secrets (`Settings > Secrets and variables > Actions`):
+
+*   `AWS_OIDC_ROLE_ARN`: ARN of the IAM Role for GitHub Actions OIDC authentication. Must have permissions for S3 upload, CodePipeline start, and the preflight check actions (e.g., `cloudformation:ListStacks`, `controltower:ListLandingZones`, `controltower:GetLandingZone`).
+*   `AWS_REGION`: AWS region where LZA Home Resources (CodePipeline, S3 bucket) reside.
+*   `S3_BUCKET`: Name of the LZA configuration S3 bucket.
+*   `S3_KEY_PREFIX`: (Optional) Prefix within the S3 bucket for the zip file.
+*   `CODEPIPELINE_NAME`: Name of the LZA CodePipeline to trigger.
+*   `LZA_STACK_PREFIX`: Prefix used for LZA CloudFormation stacks (required for preflight check script).
+
+## Usage
+
+1.  **Modify Configuration:** Edit the YAML files in the `config/` directory.
+2.  **Commit & Push:** Commit changes to a feature branch and push.
+3.  **Pull Request:** Create a Pull Request targeting `master`. The `validate` job runs automatically.
+4.  **Merge:** After review and approval, merge the Pull Request into `master`.
+5.  **Deploy:** The merge triggers the `validate` and `deploy` jobs, uploading the configuration and starting the LZA CodePipeline.
+
+### Local Validation (Optional)
+
+You can validate YAML files locally before pushing:
+
+```bash
+# Install yamllint (if not already installed)
+pip install yamllint
+
+# Run linter
+yamllint config/
+```
+
+### Local Preflight Checks (Optional)
+
+You can run the preflight checks script locally:
+
+```bash
+# Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate # or .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure AWS credentials in your environment
+# (e.g., using environment variables or aws configure)
+
+# Set required environment variables
+export AWS_REGION="your-aws-region"
+# export CT_HOME_REGION="your-ct-home-region" # If different from AWS_REGION
+export LZA_STACK_PREFIX="your-lza-stack-prefix"
+
+# Run the script (adjust path if necessary)
+python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
+```
 
 ## Checks Performed
 
