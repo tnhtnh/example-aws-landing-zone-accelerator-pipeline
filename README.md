@@ -32,7 +32,7 @@ The workflow runs on:
 1.  **Push:** To `master` or any branch when files in `config/`, `schema.yaml`, or the workflow file itself are changed.
 2.  **Pull Request:** Targeting the `master` branch when files in `config/`, `schema.yaml`, or the workflow file are changed.
 3.  **Manual Trigger (`workflow_dispatch`):** Allows running the workflow manually via the GitHub Actions UI.
-    *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped.
+    *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped. **Only use when `AWS ControlTower` is in an unknown state and re-executing this pipeline will address the issue.**
 
 ### Jobs
 
@@ -43,7 +43,7 @@ The workflow runs on:
     *   Lints all YAML files in the `config/` directory to ensure correct syntax and basic style.
 
 2.  **`deploy`:**
-    *   Runs **only** on push events to the `master` branch, after the `validate` job succeeds.
+    *   Runs **only** on push events to the `main` branch, after the `validate` job succeeds.
     *   Checks out the code.
     *   **Configure AWS Credentials:** Authenticates to AWS using OIDC via an IAM role specified in secrets.
     *   **Run LZA Preflight Checks (Conditional):**
