@@ -1,0 +1,97 @@
+name: LZA Config CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - '**' # All branches
+    paths:
+      - 'config/**'
+      - '.github/workflows/lza_config_ci.yaml'
+      - 'schema.yaml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'config/**'
+      - '.github/workflows/lza_config_ci.yaml'
+      - 'schema.yaml'
+
+permissions:
+  contents: read # Needed to check out the repository
+  id-token: write # Needed for AWS OIDC authentication
+
+jobs:
+  validate:
+    name: Validate YAML Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Yamale supports modern Python
+
+      - name: Install Yamale
+        run: pip install yamale PyYAML
+
+      - name: Validate YAML files
+        run: |
+          echo "Validating LZA configuration files against schema.yaml..."
+          yamale -s schema.yaml config/*.yaml
+          echo "Validation successful."
+
+  deploy:
+    name: Deploy to S3 and Trigger Pipeline
+    runs-on: ubuntu-latest
+    needs: validate # Ensure validation passes first
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' # Only run on push to master
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # Use OIDC Role ARN secret
+          aws-region: ${{ secrets.AWS_REGION }} # Use a secret for the region
+
+      - name: Run LZA Preflight Checks
+        env:
+          LZA_STACK_PREFIX: ${{ secrets.LZA_STACK_PREFIX }} # Use secret for prefix
+        run: |
+          echo "Setting up Python for preflight checks..."
+          # Although Python might be available, explicitly set it up for clarity
+          # python -m venv .venv
+          # source .venv/bin/activate
+          pip install -r requirements.txt # Assuming requirements.txt is at root
+          echo "Running LZA preflight check script..."
+          python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
+          echo "Preflight checks completed."
+
+      - name: Zip Configuration Files
+        run: |
+          echo "Creating aws-accelerator-config.zip..."
+          cd config
+          zip ../aws-accelerator-config.zip *.yaml
+          cd ..
+          echo "Zip file created."
+
+      - name: Upload Config to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_KEY_PREFIX: ${{ secrets.S3_KEY_PREFIX }} # Optional prefix
+        run: |
+          echo "Uploading aws-accelerator-config.zip to s3://${S3_BUCKET}/${S3_KEY_PREFIX}/"
+          aws s3 cp aws-accelerator-config.zip s3://${S3_BUCKET}/${S3_KEY_PREFIX}/aws-accelerator-config.zip
+          echo "Upload complete."
+
+      - name: Trigger CodePipeline
+        env:
+          CODEPIPELINE_NAME: ${{ secrets.CODEPIPELINE_NAME }}
+        run: |
+          echo "Starting CodePipeline execution for pipeline: ${CODEPIPELINE_NAME}"
+          aws codepipeline start-pipeline-execution --name ${CODEPIPELINE_NAME}
+          echo "Pipeline execution started." 

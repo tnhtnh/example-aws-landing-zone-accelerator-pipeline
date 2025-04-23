@@ -1,0 +1,39 @@
+mandatoryAccounts:
+  - name: Management
+    description: >-
+      The management (primary) account. Do not change the name field for this
+      mandatory account. Note, the account name key does not need to match the
+      AWS account name.
+    email: bjsslztest@gmail.com
+    organizationalUnit: Root
+    warm: false
+  - name: LogArchive
+    description: >-
+      The log archive account. Do not change the name field for this mandatory
+      account. Note, the account name key does not need to match the AWS account
+      name.
+    email: bjsslztest+logs@gmail.com
+    organizationalUnit: Security
+    warm: false
+  - name: Audit
+    description: >-
+      The security audit account (also referred to as the audit account). Do not
+      change the name field for this mandatory account. Note, the account name
+      key does not need to match the AWS account name.
+    email: bjsslztest+audit@gmail.com
+    organizationalUnit: Security
+    warm: false
+workloadAccounts:
+  - name: Network
+    description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: bjsslztest+network@gmail.com
+    organizationalUnit: Infrastructure
+  - name: Operations
+    description: This Account is used for centralized IT Operational resources (MAD, rsyslog, ITSM, etc.). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: bjsslztest+operations@gmail.com
+    organizationalUnit: Infrastructure
+  - name: Perimeter
+    description: Used for Internet facing, IaaS-based ingress/egress security services
+    email: bjsslztest+perimeter@gmail.com
+    organizationalUnit: Infrastructure
+
