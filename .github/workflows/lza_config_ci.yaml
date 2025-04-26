@@ -86,15 +86,19 @@ jobs:
         # Run if: NOT a manual trigger OR (it IS a manual trigger AND skip_preflight is false)
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_preflight == false
         env:
-          LZA_STACK_PREFIX: ${{ secrets.LZA_STACK_PREFIX }} # Use secret for prefix
+          STACK_PREFIX: ${{ secrets.LZA_STACK_PREFIX }} # Use secret for prefix, rename to STACK_PREFIX
+          # Ensure AWS_REGION and potentially CT_HOME_REGION are available if needed by the script
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          # CT_HOME_REGION: ${{ secrets.CT_HOME_REGION }} # Add if needed and different from AWS_REGION
         run: |
           echo "Setting up Python for preflight checks..."
           # Although Python might be available, explicitly set it up for clarity
           # python -m venv .venv
           # source .venv/bin/activate
           pip install -r requirements.txt # Assuming requirements.txt is at root
-          echo "Running LZA preflight check script..."
-          python -m preflight_checks.aws_checks --prefix "$LZA_STACK_PREFIX"
+          echo "Running LZA preflight check script using STACK_PREFIX env var..."
+          # Run the script as a module, it reads STACK_PREFIX from env vars
+          python -m preflight_checks.aws_checks
           echo "Preflight checks completed."
 
       - name: Zip Configuration Files

@@ -22,6 +22,10 @@ Parameters:
     Type: String
     Description: Full ARN of the LZA CodePipeline to be triggered by the workflow (e.g., arn:aws:codepipeline:us-east-1:123456789012:MyLzaPipeline).
     AllowedPattern: "^arn:aws:codepipeline:[^:]+:[0-9]{12}:.+$"
+  KmsKeyArnForS3Encryption:
+    Type: String
+    Description: The full ARN of the KMS key used to encrypt the LZA S3 bucket.
+    AllowedPattern: "^arn:aws:kms:[^:]+:[0-9]{12}:key/.+$"
   IamRoleName:
     Type: String
     Description: Name for the IAM Role to be created.
@@ -69,15 +73,19 @@ Resources:
                 Action:
                   - s3:PutObject # For uploading aws-accelerator-config.zip
                 Resource: !Sub "arn:aws:s3:::${LzaS3BucketName}/*" # Allow upload anywhere in bucket (incl. prefix)
+              - Effect: Allow # Grant KMS permission for S3 upload encryption
+                Action:
+                  - kms:GenerateDataKey
+                Resource: !Ref KmsKeyArnForS3Encryption
               - Effect: Allow
                 Action:
                   - codepipeline:StartPipelineExecution # For triggering LZA pipeline
                 Resource: !Ref LzaCodePipelineArn
               - Effect: Allow # Permissions for Preflight Checks
                 Action:
-                  - config:DescribeComplianceByConfigRule
                   - cloudformation:ListStacks
-                Resource: "*" # These actions do not support resource-level permissions
+                  # Removed config:DescribeComplianceByConfigRule as it wasn't in the provided file snippet and might not be needed for basic CFN checks
+                Resource: "*" # These actions often require broad permissions or specific resource ARNs if available
 
 Outputs:
   OidcRoleArn:
