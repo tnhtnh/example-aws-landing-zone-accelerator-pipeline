@@ -47,9 +47,26 @@ iamPasswordPolicy:
   passwordReusePrevention: 24
   maxPasswordAge: 90
 awsConfig:
-  enableConfigurationRecorder: false
-  enableDeliveryChannel: false
-  ruleSets: []
+  enableConfigurationRecorder: true
+  enableDeliveryChannel: true
+  ruleSets:
+    - deploymentTargets:
+        ##  Section for config rules across all OUs except Sandbox + Management Account
+        ## Rules not supported in ap-northeast-3 ONLY
+        organizationalUnits:
+          - Security
+          - Infrastructure
+          - Portal
+          - Customer
+        accounts:
+          - Management
+      rules:
+        - name: "{{ AcceleratorPrefix }}-cloudtrail-security-trail-enabled"
+          identifier: CLOUDTRAIL_SECURITY_TRAIL_ENABLED
+          tags:
+            - key: Accelerator
+              value: '{{ AcceleratorPrefix }}'
+
 cloudWatch:
   metricSets: []
   alarmSets: []
