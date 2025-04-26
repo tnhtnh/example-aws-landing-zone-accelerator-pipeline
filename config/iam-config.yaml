@@ -1,7 +1,19 @@
 providers: []
 policySets: []
-roleSets: []
+roleSets: 
+  - deploymentTargets:
+      organizationalUnits:
+        - Portal
+    roles:
+      - name: CI-Role-Developer
+        assumedBy:
+          - type: service
+            principal: codebuild.amazonaws.com
+        policies:
+          awsManaged: 
+            - PowerUserAccess
 groupSets: []
 userSets: []
 identityCenter:
   name: tnhtnhtnhexample
+  delegatedAdminAccount: Audit
