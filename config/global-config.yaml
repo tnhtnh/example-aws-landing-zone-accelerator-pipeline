@@ -36,11 +36,29 @@ logging:
     accountTrails: []
     lifecycleRules: []
   sessionManager:
-    sendToCloudWatchLogs: false
-    sendToS3: false
+    sendToCloudWatchLogs: true
+    sendToS3: true
     excludeRegions: []
     excludeAccounts: []
     lifecycleRules: []
     attachPolicyToIamRoles: []
 tags: []
+snsTopics:
+  deploymentTargets:
+    accounts:
+      - Management
+      - Audit
+  topics:
+    - name: SecurityHigh
+      emailAddresses:
+        - "{{ SecurityHigh }}"
+    - name: SecurityMedium
+      emailAddresses:
+        - "{{ SecurityMedium }}"
+    - name: SecurityLow
+      emailAddresses:
+        - "{{ SecurityLow }}"
+    - name: SecurityIgnore
+      emailAddresses:
+        - "{{ SecurityIgnore }}"
 iamRoleSsmParameters: []
