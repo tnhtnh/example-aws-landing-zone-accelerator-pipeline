@@ -94,7 +94,7 @@ jobs:
           # source .venv/bin/activate
           pip install -r requirements.txt # Assuming requirements.txt is at root
           echo "Running LZA preflight check script..."
-          python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
+          python -m preflight_checks.aws_checks --prefix "$LZA_STACK_PREFIX"
           echo "Preflight checks completed."
 
       - name: Zip Configuration Files
