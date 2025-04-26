@@ -28,3 +28,7 @@ workloadAccounts:
     description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
     email: bjsslztest+new-network@gmail.com
     organizationalUnit: Infrastructure
+  - name: PortalDevelopment
+    description: The Portal Development account is used for the Portal Development environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: bjsslztest+new-portal-development@gmail.com
+    organizationalUnit: Portal/Development
