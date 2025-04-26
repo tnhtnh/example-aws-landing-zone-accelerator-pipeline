@@ -2,6 +2,15 @@ enable: true
 organizationalUnits:
   - name: Security
   - name: Infrastructure
+  - name: Portal
+  - name: Portal/Development
+  - name: Portal/Staging
+  - name: Portal/Production
+  - name: Customer
+  - name: Customer/Networking
+  - name: Customer/Accounts
+quarantineNewAccounts:
+  enable: true
 serviceControlPolicies: []
 taggingPolicies: []
 chatbotPolicies: []
