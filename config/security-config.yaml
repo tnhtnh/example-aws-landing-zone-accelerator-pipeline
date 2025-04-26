@@ -47,8 +47,9 @@ iamPasswordPolicy:
   passwordReusePrevention: 24
   maxPasswordAge: 90
 awsConfig:
-  enableConfigurationRecorder: true
-  enableDeliveryChannel: true
+  enableConfigurationRecorder: false
+  enableDeliveryChannel: false
+  ruleSets: []
 cloudWatch:
   metricSets: []
   alarmSets: []
