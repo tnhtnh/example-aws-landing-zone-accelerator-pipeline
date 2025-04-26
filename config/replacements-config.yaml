@@ -1,0 +1,30 @@
+globalReplacements:
+  # Accelerator Prefix
+  - key: AcceleratorPrefix
+    type: String
+    value: testlz
+  # Home Region
+  - key: AcceleratorHomeRegion
+    type: String
+    value: ap-southeast-2
+  # Security notification emails
+  - key: SecurityHigh
+    type: String
+    value: bjsslztest+new-securityhigh@gmail.com
+  - key: SecurityMedium
+    type: String
+    value: bjsslztest+new-securitymedium@gmail.com
+  - key: SecurityLow
+    type: String
+    value: bjsslztest+new-securitylow@gmail.com
+  - key: SecurityIgnore
+    type: String
+    value: bjsslztest+new-securityignore@gmail.com
+  # Budget notification emails
+  - key: BudgetEmail
+    type: String
+    value: bjsslztest+new-budget@gmail.com
+  # Name of CloudWatch log group that centralizes CloudTrail logs. Referenced by CloudWatch metrics and alarms
+  - key: CloudTrailLogGroup
+    type: String
+    value: aws-controltower/CloudTrailLogs # UPDATE If using ControlTower change this to 'aws-controltower/CloudTrailLogs'
