@@ -3,3 +3,5 @@ policySets: []
 roleSets: []
 groupSets: []
 userSets: []
+identityCenter:
+  name: tnhtnhtnhexample
