@@ -22,26 +22,46 @@ controlTower:
 logging:
   account: LogArchive
   cloudtrail:
-    enable: false
-    organizationTrail: false
+    enable: true
+    organizationTrail: true
     organizationTrailSettings:
       multiRegionTrail: true
       globalServiceEvents: true
-      managementEvents: true
+      managementEvents: false # UPDATE If using ControlTower, set to False.
       s3DataEvents: true
-      lambdaDataEvents: true
+      lambdaDataEvents: false
       sendToCloudWatchLogs: true
       apiErrorRateInsight: false
-      apiCallRateInsight: false
-    accountTrails: []
-    lifecycleRules: []
+      apiCallRateInsight: true
+    accountTrails:
+      - name: AccountTrail
+        regions:
+          - ap-southeast-2 
+        deploymentTargets:
+          accounts: []
+          organizationalUnits: []
+        settings:
+          multiRegionTrail: true
+          globalServiceEvents: true
+          managementEvents: true
+          s3DataEvents: true
+          lambdaDataEvents: true
+          sendToCloudWatchLogs: true
+          apiErrorRateInsight: false
+          apiCallRateInsight: false
   sessionManager:
     sendToCloudWatchLogs: true
     sendToS3: true
-    excludeRegions: []
-    excludeAccounts: []
-    lifecycleRules: []
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
     attachPolicyToIamRoles: []
+    excludeAccounts:
+      - Management
+      - LogArchive
+      - Audit
 tags: []
 snsTopics:
   deploymentTargets:
