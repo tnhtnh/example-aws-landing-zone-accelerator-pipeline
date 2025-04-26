@@ -23,4 +23,8 @@ mandatoryAccounts:
     email: bjsslztest+new-audit@gmail.com
     organizationalUnit: Security
     warm: false
-workloadAccounts: []
+workloadAccounts:
+  - name: Network
+    description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: bjsslztest+new-audit@gmail.com
+    organizationalUnit: Infrastructure
