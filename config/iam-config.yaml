@@ -1,6 +1,6 @@
 providers: []
 policySets: []
-roleSets: 
+roleSets:
   - deploymentTargets:
       organizationalUnits:
         - Portal
@@ -10,7 +10,7 @@ roleSets:
           - type: service
             principal: codebuild.amazonaws.com
         policies:
-          awsManaged: 
+          awsManaged:
             - PowerUserAccess
 groupSets: []
 userSets: []
