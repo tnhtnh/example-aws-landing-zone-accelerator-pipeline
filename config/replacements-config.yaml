@@ -27,4 +27,7 @@ globalReplacements:
   # Name of CloudWatch log group that centralizes CloudTrail logs. Referenced by CloudWatch metrics and alarms
   - key: CloudTrailLogGroup
     type: String
-    value: aws-controltower/CloudTrailLogs # UPDATE If using ControlTower change this to 'aws-controltower/CloudTrailLogs'
+    value: aws-controltower/CloudTrailLogs
+  - key: sandboxCidr
+    type: String
+    value: 10.0.0.0/20

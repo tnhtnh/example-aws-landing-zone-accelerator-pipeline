@@ -1,6 +1,45 @@
 defaultVpc:
   delete: false
   excludeAccounts: []
-transitGateways: []
-endpointPolicies: []
+endpointPolicies:
+  - name: Default
+    document: vpc-endpoint-policies/default.json
+  - name: EC2
+    document: vpc-endpoint-policies/ec2.json
 vpcs: []
+transitGateways:
+  - name: Network-Main
+    account: Network
+    region: ap-southeast-2
+    shareTargets:
+      organizationalUnits:
+        - Infrastructure
+    asn: 65521
+    dnsSupport: enable
+    vpnEcmpSupport: enable
+    defaultRouteTableAssociation: disable
+    defaultRouteTablePropagation: disable
+    autoAcceptSharingAttachments: enable
+    routeTables:
+      - name: Network-Main-Core
+        routes: []
+      - name: Network-Main-Segregated
+        routes: []
+      - name: Network-Main-Shared
+        routes: []
+      - name: Network-Main-Standalone
+        routes: []
+centralNetworkServices:
+  delegatedAdminAccount: Network
+  ipams:
+    - name: "{{ AcceleratorPrefix }}-ipam"
+      region: ap-southeast-2
+      description: "{{ AcceleratorPrefix }} IPAM"
+      operatingRegions:
+        - ap-southeast-2
+      pools:
+        ### Global Ipam Pools ###
+        - name: "{{ AcceleratorPrefix }}-sandbox-pool"
+          description: "Sandbox networks are isolated to the local sandbox account they are created for, and never connected to other networks in the accelerator, therefore overlapping ranges are by design."
+          provisionedCidrs:
+            - "{{ sandboxCidr }}"
