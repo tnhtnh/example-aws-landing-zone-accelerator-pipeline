@@ -28,9 +28,25 @@ centralSecurityServices:
       exportFrequency: FIFTEEN_MINUTES
   securityHub:
     enable: true
-    regionAggregation: false
+    regionAggregation: true
     excludeRegions: []
-    standards: []
+    snsTopicName: SecurityHigh
+    notificationLevel: HIGH
+    standards:
+      - name: AWS Foundational Security Best Practices v1.0.0
+        enable: true
+        controlsToDisable:
+          - IAM.1
+          - EC2.10
+          - Lambda.4
+      - name: CIS AWS Foundations Benchmark v3.0.0
+        enable: true
+      - name: NIST Special Publication 800-53 Revision 5
+        enable: true
+      - name: PCI DSS v3.2.1
+        enable: false
+      - name: CIS AWS Foundations Benchmark v1.2.0
+        enable: false
   ssmAutomation:
     excludeRegions: []
     documentSets: []
