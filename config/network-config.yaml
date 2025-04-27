@@ -6,7 +6,78 @@ endpointPolicies:
     document: vpc-endpoint-policies/default.json
   - name: EC2
     document: vpc-endpoint-policies/ec2.json
-vpcs: []
+vpcs:
+  - name: Portal-Dev
+    account: Portal-Dev
+    region: ap-southeast-2
+    ipamAllocations:
+      - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+        netmaskLength: 16
+    internetGateway: false
+    natGateways: []
+    useCentralEndpoints: true
+    subnets:
+      - name: Public-a
+        availabilityZone: a
+        routeTable: PublicRouteTable
+      - name: Public-b
+        availabilityZone: b
+        routeTable: PublicRouteTable
+      - name: Public-c
+        availabilityZone: c
+        routeTable: PublicRouteTable
+      - name: Private-a
+        availabilityZone: a
+        routeTable: PrivateRouteTable
+      - name: Private-b
+        availabilityZone: b
+        routeTable: PrivateRouteTable
+      - name: Private-c
+        availabilityZone: c
+        routeTable: PrivateRouteTable
+    routeTables:
+      - name: PublicRouteTable
+        routes:
+          - name: DefaultRouteToTgw
+            destination: 0.0.0.0/0
+            target: transitGateway
+      - name: PrivateRouteTable
+        routes:
+          - name: DefaultRouteToTgw
+            destination: 0.0.0.0/0
+            target: transitGateway
+    transitGatewayAttachments:
+      - name: Portal-Dev-Tgw-Attachment
+        transitGateway:
+          account: Network
+          name: Network-Main
+        subnets:
+          - Private-a
+          - Private-b
+          - Private-c
+        routeTableAssociations:
+          - Network-Main-Shared
+centralNetworkServices:
+  delegatedAdminAccount: Network
+  ipams:
+    - name: "{{ AcceleratorPrefix }}-ipam"
+      region: ap-southeast-2
+      description: "{{ AcceleratorPrefix }} IPAM"
+      operatingRegions:
+        - ap-southeast-2
+      pools:
+        - name: "{{ AcceleratorPrefix }}-sandbox-pool"
+          description: "Sandbox networks are isolated to the local sandbox account they are created for, and never connected to other networks in the accelerator, therefore overlapping ranges are by design."
+          provisionedCidrs:
+            - "{{ sandboxCidr }}"
+        - name: "{{ AcceleratorPrefix }}-portal-shared-pool"
+          description: "IPAM Pool for Portal and Shared Infrastructure CIDRs (10.0.0.0/16)"
+          provisionedCidrs:
+            - 10.0.0.0/16
+        - name: "{{ AcceleratorPrefix }}-customer-pool"
+          description: "IPAM Pool for Customer Environment CIDRs (10.1.0.0/16)"
+          provisionedCidrs:
+            - 10.1.0.0/16
 transitGateways:
   - name: Network-Main
     account: Network
@@ -29,17 +100,3 @@ transitGateways:
         routes: []
       - name: Network-Main-Standalone
         routes: []
-centralNetworkServices:
-  delegatedAdminAccount: Network
-  ipams:
-    - name: "{{ AcceleratorPrefix }}-ipam"
-      region: ap-southeast-2
-      description: "{{ AcceleratorPrefix }} IPAM"
-      operatingRegions:
-        - ap-southeast-2
-      pools:
-        ### Global Ipam Pools ###
-        - name: "{{ AcceleratorPrefix }}-sandbox-pool"
-          description: "Sandbox networks are isolated to the local sandbox account they are created for, and never connected to other networks in the accelerator, therefore overlapping ranges are by design."
-          provisionedCidrs:
-            - "{{ sandboxCidr }}"
