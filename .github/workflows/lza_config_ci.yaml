@@ -103,11 +103,17 @@ jobs:
 
       - name: Zip Configuration Files
         run: |
-          echo "Creating aws-accelerator-config.zip..."
+          echo "Creating aws-accelerator-config.zip including all files and directories..."
           cd config
-          zip ../aws-accelerator-config.zip *.yaml
+          zip -r ../aws-accelerator-config.zip *
           cd ..
           echo "Zip file created."
+
+      - name: Upload Config Zip as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-accelerator-config
+          path: aws-accelerator-config.zip
 
       - name: Upload Config to S3
         env:
