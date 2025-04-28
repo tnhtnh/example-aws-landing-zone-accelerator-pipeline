@@ -40,7 +40,7 @@ centralNetworkServices:
         - us-east-1
         - us-west-1
         - eu-central-1
-        - eu-west-2    
+        - eu-west-2
       pools:
         ### Global Ipam Pools ###
         - name: "{{ AcceleratorPrefix }}-aws-pool"
@@ -69,7 +69,7 @@ centralNetworkServices:
           description: "Central Egress Pool Public"
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ centralEgressPoolPublicCidr }}" 
+            - "{{ centralEgressPoolCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-core-pool"
         - name: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
           description: "Central Egress Pool Internal"
@@ -83,8 +83,6 @@ centralNetworkServices:
           provisionedCidrs:
             - "{{ centralEgressPoolPublicCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
-
-            
 
 vpcs:
   - name: Egress
@@ -130,7 +128,7 @@ vpcs:
         routeTable: Egress
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
-          netmaskLength: 27     
+          netmaskLength: 27
       - name: EgressTgwAttach-B
         availabilityZone: b
         routeTable: Egress
@@ -186,5 +184,4 @@ vpcs:
         - service: sns
         - service: sqs
         - service: sts
-    resolverRules:
-      - "{{ AcceleratorPrefix }}-Egress-mad-example-local"
+
