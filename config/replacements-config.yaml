@@ -47,7 +47,7 @@ globalReplacements:
     value: 10.128.0.0/24
   - key: CentralEgressInternalSubnetACidr
     type: String
-    value: 10.128.0.0/26  
+    value: 10.128.0.0/26
   - key: CentralEgressInternalSubnetBCidr
     type: String
     value: 10.128.0.64/26
