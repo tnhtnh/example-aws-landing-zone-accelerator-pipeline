@@ -28,6 +28,15 @@ globalReplacements:
   - key: CloudTrailLogGroup
     type: String
     value: aws-controltower/CloudTrailLogs
-  - key: sandboxCidr
+  - key: awsCidr
     type: String
-    value: 10.0.0.0/20
+    value: 10.128.0.0/10
+  - key: coreCidr
+    type: String
+    value: 10.128.0.0/14
+  - key: portalCidr
+    type: String
+    value: 10.132.0.0/14
+  - key: customCidr
+    type: String
+    value: 10.136.0.0/13

@@ -37,9 +37,31 @@ centralNetworkServices:
       description: "{{ AcceleratorPrefix }} IPAM"
       operatingRegions:
         - ap-southeast-2
+        - us-east-1
+        - us-west-1
+        - eu-central-1
+        - eu-west-2    
       pools:
         ### Global Ipam Pools ###
-        - name: "{{ AcceleratorPrefix }}-sandbox-pool"
-          description: "Sandbox networks are isolated to the local sandbox account they are created for, and never connected to other networks in the accelerator, therefore overlapping ranges are by design."
+        - name: "{{ AcceleratorPrefix }}-aws-pool"
+          description: "Primary AWS IP Space."
           provisionedCidrs:
-            - "{{ sandboxCidr }}"
+            - "{{ awsCidr }}"
+        - name: "{{ AcceleratorPrefix }}-core-pool"
+          description: "Core IP Space."
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ coreCidr }}"
+          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
+        - name: "{{ AcceleratorPrefix }}-portal-pool"
+          description: "Portal IP Space."
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ portalCidr }}"
+          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
+        - name: "{{ AcceleratorPrefix }}-custom-pool"
+          description: "Custom IP Space."
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ customCidr }}"
+          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
