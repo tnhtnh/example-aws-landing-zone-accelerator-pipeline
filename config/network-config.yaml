@@ -45,7 +45,7 @@ centralNetworkServices:
         - name: "{{ AcceleratorPrefix }}-aws-pool"
           description: "Primary AWS IP Space."
           provisionedCidrs:
-            - "{{ awsCidr }}"
+            - "{{ AwsCidr }}"
         - name: "{{ AcceleratorPrefix }}-core-pool"
           description: "Core IP Space."
           locale: ap-southeast-2

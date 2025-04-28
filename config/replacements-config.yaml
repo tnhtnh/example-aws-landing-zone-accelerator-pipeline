@@ -21,13 +21,13 @@ globalReplacements:
     type: String
     value: bjsslztest+new-securityignore@gmail.com
   # Budget notification emails
-  - key: BudgetEmail
-    type: String
-    value: bjsslztest+new-budget@gmail.com
+  #- key: BudgetEmail
+  #  type: String
+  #  value: bjsslztest+new-budget@gmail.com
   # Name of CloudWatch log group that centralizes CloudTrail logs. Referenced by CloudWatch metrics and alarms
-  - key: CloudTrailLogGroup
-    type: String
-    value: aws-controltower/CloudTrailLogs
+  #- key: CloudTrailLogGroup
+  #  type: String
+  #  value: aws-controltower/CloudTrailLogs
   # Networking ranges
   - key: AwsCidr
     type: String

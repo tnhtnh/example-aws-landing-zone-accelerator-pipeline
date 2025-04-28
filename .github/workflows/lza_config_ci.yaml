@@ -50,6 +50,11 @@ jobs:
           yamllint config/
           echo "Linting successful."
 
+      - name: Validate Replacement Keys
+        run: |
+          pip install pyyaml
+          python scripts/validate_replacements.py
+
   deploy:
     name: Deploy to S3 and Trigger Pipeline
     runs-on: ubuntu-latest
