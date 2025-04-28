@@ -50,45 +50,27 @@ centralNetworkServices:
           description: "Core IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ coreCidr }}"
+            - "{{ CoreCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
         - name: "{{ AcceleratorPrefix }}-portal-pool"
           description: "Portal IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ portalCidr }}"
+            - "{{ PortalCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
         - name: "{{ AcceleratorPrefix }}-customer-pool"
           description: "Customer IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ customerCidr }}"
+            - "{{ CustomerCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-        - name: "{{ AcceleratorPrefix }}-central-egress-pool"
-          description: "Central Egress Pool Public"
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ centralEgressPoolCidr }}"
-          sourceIpamPool: "{{ AcceleratorPrefix }}-core-pool"
-        - name: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
-          description: "Central Egress Pool Internal"
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ centralEgressPoolInternalCidr }}"
-          sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
-        - name: "{{ AcceleratorPrefix }}-central-egress-pool-public"
-          description: "Central Egress Pool Public"
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ centralEgressPoolPublicCidr }}"
-          sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
   route53Resolver:
     endpoints:
       - name: EndpointOutbound
         type: OUTBOUND
         vpc: Egress
         allowedCidrs:
-          - {{ awsCidr }}
+          - {{ AwsCidr }}
         subnets:
           - Egress-A
           - Egress-B
@@ -131,11 +113,10 @@ vpcs:
         value: Egress
     account: Network
     region: "{{ AcceleratorHomeRegion }}"
-    ipamAllocations:
-      - ipamPoolName: "{{ AcceleratorPrefix }}-core-pool" 
-        netmaskLength: 24
+    cidrs:
+      - {{ CentralEgressCidr }}
     defaultSecurityGroupRulesDeletion: true
-    internetGateway: false
+    internetGateway: true
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
@@ -154,27 +135,19 @@ vpcs:
       - name: Egress-A
         availabilityZone: a
         routeTable: Egress
-        ipamAllocation:
-          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
-          netmaskLength: 27
+        ipv4CidrBlock: "{{ CentralEgressPublicSubnetACidr }}"
       - name: Egress-B
         availabilityZone: b
         routeTable: Egress
-        ipamAllocation:
-          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
-          netmaskLength: 27
+        ipv4CidrBlock: "{{ CentralEgressPublicSubnetBCidr }}"
       - name: EgressTgwAttach-A
         availabilityZone: a
         routeTable: Egress
-        ipamAllocation:
-          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
-          netmaskLength: 27
+        ipv4CidrBlock: "{{ CentralEgressInternalSubnetACidr }}"
       - name: EgressTgwAttach-B
         availabilityZone: b
         routeTable: Egress
-        ipamAllocation:
-          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
-          netmaskLength: 27
+        ipv4CidrBlock: "{{ CentralEgressInternalSubnetBCidr }}"
     gatewayEndpoints:
       defaultPolicy: Default
       endpoints:
