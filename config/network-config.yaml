@@ -62,7 +62,7 @@ centralNetworkServices:
           description: "Customer IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ customCidr }}"
+            - "{{ customerCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
         - name: "{{ AcceleratorPrefix }}-central-egress-pool"
           description: "Central Egress Pool Public"
@@ -82,6 +82,48 @@ centralNetworkServices:
           provisionedCidrs:
             - "{{ centralEgressPoolPublicCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
+  route53Resolver:
+    endpoints:
+      - name: EndpointOutbound
+        type: OUTBOUND
+        vpc: Endpoint
+        allowedCidrs:
+          - {{ awsCidr }}
+        subnets:
+          - Egress-A
+          - Egress-B
+        rules:
+          - name: "{{ AcceleratorPrefix }}-Endpoint-local"
+            domainName: {{ InternalDnsName }}
+            targetIps:
+              - ip: 1.1.1.1
+              # port: '5353' # only include if targeting a non-standard DNS port
+              - ip: 2.2.2.2
+            shareTargets:
+              accounts:
+                - Network
+    queryLogs:
+      name: "{{ AcceleratorPrefix }}-query-logs"
+      destinations:
+        - s3
+        - cloud-watch-logs
+      shareTargets:
+        organizationalUnits:
+          - Infrastructure
+    firewallRuleGroups:
+      - name: accelerator-block-group
+        regions:
+          - {{ AcceleratorHomeRegion }}
+        rules:
+          - name: managed-rule
+            action: BLOCK
+            managedDomainList: AWSManagedDomainsBotnetCommandandControl
+            priority: 300
+            blockResponse: NODATA
+        shareTargets:
+          organizationalUnits:
+            - Infrastructure
+
 vpcs:
   - name: Egress
     tags:
@@ -98,7 +140,7 @@ vpcs:
     enableDnsSupport: true
     instanceTenancy: default
     queryLogs:
-      - accelerator-query-logs
+      - "{{ AcceleratorPrefix }}-query-logs"
     routeTables:
       - name: Egress
         routes:

@@ -26,6 +26,23 @@ centralSecurityServices:
       overrideExisting: false
       destinationType: S3
       exportFrequency: FIFTEEN_MINUTES
+  auditManager:
+    enable: true
+    excludeRegions:
+      - ca-west-1 # Does not support Audit Manager
+      - eu-west-3 # Does not support Audit Manager
+      - ap-northeast-2 # Does not support Audit Manager
+      - ap-northeast-3 # Does not support Audit Manager
+      - eu-north-1 # Does not support Audit Manager
+      - sa-east-1 # Does not support Audit Manager
+    defaultReportsConfiguration:
+      enable: true
+      destinationType: S3
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 1000
+        noncurrentVersionExpiration: 1000
   securityHub:
     enable: true
     regionAggregation: true

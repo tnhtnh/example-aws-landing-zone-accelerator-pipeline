@@ -49,3 +49,6 @@ globalReplacements:
   - key: centralEgressPoolCidr
     type: String
     value: 10.128.0.0/24
+  - key: InternalDnsName
+    type: String
+    value: site.internal
