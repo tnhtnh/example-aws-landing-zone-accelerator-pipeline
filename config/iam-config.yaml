@@ -1,9 +1,26 @@
 providers: []
-policySets: []
+policySets:
+  - deploymentTargets:
+      organizationalUnits:
+        - Portal
+        - Customer
+    policies:
+      - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
+        policy: iam-policies/ci-role-developer-boundary-policy.json
+  - deploymentTargets:
+      organizationalUnits:
+        - Portal
+        - Infrastructure
+        - Customer
+        - Security
+    policies:
+      - name: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
+        policy: iam-policies/ci-role-platform-engineer-boundary-policy.json
 roleSets:
   - deploymentTargets:
       organizationalUnits:
         - Portal
+        - Customer
     roles:
       - name: CI-Role-Developer
         assumedBy:
@@ -12,6 +29,22 @@ roleSets:
         policies:
           awsManaged:
             - PowerUserAccess
+        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
+  - deploymentTargets:
+      organizationalUnits:
+        - Portal
+        - Infrastructure
+        - Customer
+        - Security
+    roles:
+      - name: CI-Role-PlatformEngineer
+        assumedBy:
+          - type: service
+            principal: codebuild.amazonaws.com
+        policies:
+          awsManaged:
+            - PowerUserAccess
+        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
 groupSets: []
 userSets: []
 identityCenter:
