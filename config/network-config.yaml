@@ -197,3 +197,19 @@ vpcs:
         - service: sns
         - service: sqs
         - service: sts
+vpcTemplates:
+  - name: Customer-VPC-Template
+    deploymentTargets:
+      organizationalUnits:
+        - Customer/Accounts
+    region: ap-southeast-2
+    ipamAllocations:
+      - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+        netmaskLength: 24
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    routeTables: []
+    subnets: []
+    natGateways: []
+    transitGatewayAttachments: []
