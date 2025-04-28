@@ -6,7 +6,6 @@ endpointPolicies:
     document: vpc-endpoint-policies/default.json
   - name: EC2
     document: vpc-endpoint-policies/ec2.json
-
 transitGateways:
   - name: Network-Main
     account: Network
@@ -83,7 +82,6 @@ centralNetworkServices:
           provisionedCidrs:
             - "{{ centralEgressPoolPublicCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
-
 vpcs:
   - name: Egress
     tags:
@@ -184,4 +182,3 @@ vpcs:
         - service: sns
         - service: sqs
         - service: sts
-
