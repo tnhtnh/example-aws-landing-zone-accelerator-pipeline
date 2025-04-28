@@ -40,3 +40,12 @@ globalReplacements:
   - key: customCidr
     type: String
     value: 10.136.0.0/13
+  - key: centralEgressPoolPublicCidr
+    type: String
+    value: 10.128.0.0/25
+  - key: centralEgressPoolInternalCidr
+    type: String
+    value: 10.128.127.0/25
+  - key: centralEgressPoolCidr
+    type: String
+    value: 10.128.0.0/24

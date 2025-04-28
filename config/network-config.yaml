@@ -6,7 +6,7 @@ endpointPolicies:
     document: vpc-endpoint-policies/default.json
   - name: EC2
     document: vpc-endpoint-policies/ec2.json
-vpcs: []
+
 transitGateways:
   - name: Network-Main
     account: Network
@@ -59,9 +59,132 @@ centralNetworkServices:
           provisionedCidrs:
             - "{{ portalCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-        - name: "{{ AcceleratorPrefix }}-custom-pool"
-          description: "Custom IP Space."
+        - name: "{{ AcceleratorPrefix }}-customer-pool"
+          description: "Customer IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
             - "{{ customCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
+        - name: "{{ AcceleratorPrefix }}-central-egress-pool"
+          description: "Central Egress Pool Public"
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ centralEgressPoolPublicCidr }}" 
+          sourceIpamPool: "{{ AcceleratorPrefix }}-core-pool"
+        - name: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
+          description: "Central Egress Pool Internal"
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ centralEgressPoolInternalCidr }}"
+          sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
+        - name: "{{ AcceleratorPrefix }}-central-egress-pool-public"
+          description: "Central Egress Pool Public"
+          locale: ap-southeast-2
+          provisionedCidrs:
+            - "{{ centralEgressPoolPublicCidr }}"
+          sourceIpamPool: "{{ AcceleratorPrefix }}-central-egress-pool"
+
+            
+
+vpcs:
+  - name: Egress
+    tags:
+      - key: Name
+        value: Egress
+    account: Network
+    region: ap-southeast-2
+    ipamAllocations:
+      - ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool"
+        netmaskLength: 21
+    defaultSecurityGroupRulesDeletion: true
+    internetGateway: false
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    queryLogs:
+      - accelerator-query-logs
+    routeTables:
+      - name: Egress
+        routes:
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+    subnets:
+      - name: Egress-A
+        availabilityZone: a
+        routeTable: Egress
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
+          netmaskLength: 23
+      - name: Egress-B
+        availabilityZone: b
+        routeTable: Egress
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
+          netmaskLength: 23
+      - name: EgressTgwAttach-A
+        availabilityZone: a
+        routeTable: Egress
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
+          netmaskLength: 27     
+      - name: EgressTgwAttach-B
+        availabilityZone: b
+        routeTable: Egress
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-internal"
+          netmaskLength: 27
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+    interfaceEndpoints:
+      central: true
+      defaultPolicy: Default
+      subnets:
+        - Egress-A
+        - Egress-B
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+        - service: cloudformation
+        - service: secretsmanager
+        - service: monitoring
+        - service: access-analyzer
+        - service: acm-pca
+        - service: application-autoscaling
+        - service: athena
+        - service: autoscaling
+        - service: autoscaling-plans
+        - service: awsconnector
+        - service: cloudtrail
+        - service: codebuild
+        - service: codecommit
+        - service: codepipeline
+        - service: config
+        - service: ebs
+        - service: ecr.api
+        - service: ecr.dkr
+        - service: ecs
+        - service: ecs-agent
+        - service: ecs-telemetry
+        - service: elasticbeanstalk
+        - service: elasticbeanstalk-health
+        - service: elasticfilesystem
+        - service: elasticloadbalancing
+        - service: elasticmapreduce
+        - service: events
+        - service: execute-api
+        - service: sns
+        - service: sqs
+        - service: sts
+    resolverRules:
+      - "{{ AcceleratorPrefix }}-Egress-mad-example-local"
