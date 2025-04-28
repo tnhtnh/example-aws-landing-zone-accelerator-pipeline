@@ -32,7 +32,7 @@ centralNetworkServices:
   delegatedAdminAccount: Network
   ipams:
     - name: "{{ AcceleratorPrefix }}-ipam"
-      region: ap-southeast-2
+      region: "{{ AcceleratorHomeRegion }}"
       description: "{{ AcceleratorPrefix }} IPAM"
       operatingRegions:
         - ap-southeast-2
@@ -88,10 +88,10 @@ vpcs:
       - key: Name
         value: Egress
     account: Network
-    region: ap-southeast-2
+    region: "{{ AcceleratorHomeRegion }}"
     ipamAllocations:
       - ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool"
-        netmaskLength: 21
+        netmaskLength: 24
     defaultSecurityGroupRulesDeletion: true
     internetGateway: false
     enableDnsHostnames: true
@@ -114,13 +114,13 @@ vpcs:
         routeTable: Egress
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
-          netmaskLength: 23
+          netmaskLength: 27
       - name: Egress-B
         availabilityZone: b
         routeTable: Egress
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool-public"
-          netmaskLength: 23
+          netmaskLength: 27
       - name: EgressTgwAttach-A
         availabilityZone: a
         routeTable: Egress

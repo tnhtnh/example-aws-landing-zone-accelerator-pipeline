@@ -37,7 +37,7 @@ globalReplacements:
   - key: portalCidr
     type: String
     value: 10.132.0.0/14
-  - key: customCidr
+  - key: customerCidr
     type: String
     value: 10.136.0.0/13
   - key: centralEgressPoolPublicCidr
@@ -45,7 +45,7 @@ globalReplacements:
     value: 10.128.0.0/25
   - key: centralEgressPoolInternalCidr
     type: String
-    value: 10.128.127.0/25
+    value: 10.128.0.128/25
   - key: centralEgressPoolCidr
     type: String
     value: 10.128.0.0/24
