@@ -86,7 +86,7 @@ centralNetworkServices:
     endpoints:
       - name: EndpointOutbound
         type: OUTBOUND
-        vpc: Endpoint
+        vpc: Egress
         allowedCidrs:
           - {{ awsCidr }}
         subnets:
@@ -132,7 +132,7 @@ vpcs:
     account: Network
     region: "{{ AcceleratorHomeRegion }}"
     ipamAllocations:
-      - ipamPoolName: "{{ AcceleratorPrefix }}-central-egress-pool"
+      - ipamPoolName: "{{ AcceleratorPrefix }}-core-pool" 
         netmaskLength: 24
     defaultSecurityGroupRulesDeletion: true
     internetGateway: false
