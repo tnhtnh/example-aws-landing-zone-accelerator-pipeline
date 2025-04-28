@@ -55,6 +55,10 @@ jobs:
           pip install pyyaml
           python scripts/validate_replacements.py
 
+      - name: Validate JSON Config Files
+        run: |
+          python scripts/validate_json_configs.py
+
   deploy:
     name: Deploy to S3 and Trigger Pipeline
     runs-on: ubuntu-latest
