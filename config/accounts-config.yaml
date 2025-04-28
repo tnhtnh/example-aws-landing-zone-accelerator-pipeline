@@ -37,4 +37,3 @@ workloadAccounts:
     description: Customer123 account.
     email: bjsslztest+new-customer123@gmail.com
     organizationalUnit: Customer/Accounts
-
