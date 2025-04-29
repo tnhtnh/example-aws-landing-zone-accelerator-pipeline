@@ -11,7 +11,33 @@ organizationalUnits:
   - name: Customer/Accounts
 quarantineNewAccounts:
   enable: true
-serviceControlPolicies: []
+  scpPolicyName: "{{ AcceleratorPrefix }}-Quarantine-New-Object"
+serviceControlPolicies:
+  - name: "{{ AcceleratorPrefix }}-Quarantine-New-Object"
+    description: >
+      LZA Quarantine policy - Apply to ACCOUNTS that need to be quarantined
+    policy: service-control-policies/Quarantine-New-Object.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits: []
+  - name: "{{ AcceleratorPrefix }}-Customer-Policy"
+    description: >
+      Customer resource policy - Apply to Customer accounts
+    policy: service-control-policies/Customer-Resource-Policy.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits:
+        - Customer/Accounts
+  - name: "{{ AcceleratorPrefix }}-General-Workload-Policy"
+    description: >
+      General workload policy - Apply to all accounts
+    policy: service-control-policies/General-Workload-Policy.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits:
+        - Customer
+        - Portal
+
 taggingPolicies: []
 chatbotPolicies: []
 backupPolicies: []
