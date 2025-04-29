@@ -27,28 +27,21 @@ serviceControlPolicies:
     policy: service-control-policies/Customer-Resource-Policy.json
     type: customerManaged
     deploymentTargets:
-      organizationalUnits:
-        - Customer/Accounts
+      organizationalUnits: []
   - name: "{{ AcceleratorPrefix }}-General-Workload-Policy"
     description: >
       General workload policy - Apply to all accounts
     policy: service-control-policies/General-Workload-Policy.json
     type: customerManaged
     deploymentTargets:
-      organizationalUnits:
-        - Customer
-        - Portal
+      organizationalUnits: []
   - name: "{{ AcceleratorPrefix }}-AWS-Regions"
     description: >
       Regions we will operate in
     policy: service-control-policies/AWS-Regions.json
     type: customerManaged
     deploymentTargets:
-      organizationalUnits:
-        - Customer
-        - Portal
-        - Infrastructure
-        - Sandbox
+      organizationalUnits: []
 taggingPolicies: []
 chatbotPolicies: []
 backupPolicies: []
