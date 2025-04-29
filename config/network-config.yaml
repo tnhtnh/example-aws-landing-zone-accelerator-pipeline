@@ -63,6 +63,9 @@ centralNetworkServices:
           locale: ap-southeast-2
           provisionedCidrs:
             - "{{ CustomerCidr }}"
+          shareTargets:
+            organizationalUnits:
+              - Customer/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
   route53Resolver:
     endpoints:
