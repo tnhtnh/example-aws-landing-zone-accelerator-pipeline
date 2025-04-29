@@ -1,0 +1,41 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "DenySecurityServicesOutsideAllowedRegions",
+        "Effect": "Deny",
+        "NotAction": [
+          "config:*",
+          "cloudtrail:*",
+          "guardduty:*",
+          "securityhub:*",
+          "iam:*",
+          "organizations:*",
+          "accessanalyzer:*",
+          "macie:*",
+          "detective:*",
+          "cloudhsm:*",
+          "kms:*",
+          "shield:*",
+          "waf:*",
+          "wafv2:*",
+          "firewall:*",
+          "inspector:*",
+          "auditmanager:*",
+          "ssm:*"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "StringNotEqualsIfExists": {
+            "aws:RequestedRegion": [
+              "ap-southeast-2",
+              "us-east-1",
+              "us-west-1",
+              "eu-central-1",
+              "eu-west-2"
+            ]
+          }
+        }
+      }
+    ]
+  }
