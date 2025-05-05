@@ -72,3 +72,4 @@ globalReplacements:
     value: 10.136.0.0/13
   - key: VpcProductionCidr
     type: String
+    value: 10.144.0.0/13
