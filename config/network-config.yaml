@@ -253,6 +253,7 @@ vpcs:
       - name: EgressVpcAttachment
         transitGateway:
           name: Network-Main
+          account: Network
         subnets:
           - EgressTgwAttach-A
           - EgressTgwAttach-B
