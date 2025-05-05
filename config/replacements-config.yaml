@@ -61,3 +61,14 @@ globalReplacements:
   - key: InternalDnsName
     type: String
     value: site.internal
+  - key: OnPremisesPrefixList
+    type: String
+    value: 192.168.0.0/16
+  - key: VpcDevelopmentCidr
+    type: String
+    value: 10.132.0.0/14
+  - key: VpcStagingCidr
+    type: String
+    value: 10.136.0.0/13
+  - key: VpcProductionCidr
+    type: String
