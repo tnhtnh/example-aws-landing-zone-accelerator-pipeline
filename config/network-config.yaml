@@ -13,6 +13,9 @@ transitGateways:
     shareTargets:
       organizationalUnits:
         - Infrastructure
+        - Portal/Development
+        - Portal/Staging
+        - Portal/Production
     asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
@@ -134,6 +137,14 @@ vpcs:
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
+          - name: DefaultRoute
+            destination: "0.0.0.0/0"
+            type: internetGateway
+      - name: TgwAttachmentRouteTable
+        routes:
+          - name: DefaultRoute
+            destination: "0.0.0.0/0"
+            type: internetGateway
     subnets:
       - name: Egress-A
         availabilityZone: a
@@ -145,11 +156,11 @@ vpcs:
         ipv4CidrBlock: "{{ CentralEgressPublicSubnetBCidr }}"
       - name: EgressTgwAttach-A
         availabilityZone: a
-        routeTable: Egress
+        routeTable: TgwAttachmentRouteTable
         ipv4CidrBlock: "{{ CentralEgressInternalSubnetACidr }}"
       - name: EgressTgwAttach-B
         availabilityZone: b
-        routeTable: Egress
+        routeTable: TgwAttachmentRouteTable
         ipv4CidrBlock: "{{ CentralEgressInternalSubnetBCidr }}"
     gatewayEndpoints:
       defaultPolicy: Default
@@ -200,6 +211,20 @@ vpcs:
         - service: sns
         - service: sqs
         - service: sts
+    transitGatewayAttachments:
+      - name: EgressVpcAttachment
+        transitGateway:
+          name: Network-Main
+        subnets:
+          - EgressTgwAttach-A
+          - EgressTgwAttach-B
+        routeTableAssociations:
+          - Network-Main-Shared
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Segregated
+          - Network-Main-Shared
+          - Network-Main-Standalone
 vpcTemplates:
   - name: Customer-VPC-Template
     deploymentTargets:
