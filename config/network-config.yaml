@@ -13,9 +13,6 @@ transitGateways:
     shareTargets:
       organizationalUnits:
         - Infrastructure
-        - Portal/Development
-        - Portal/Staging
-        - Portal/Production
     asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
@@ -26,9 +23,23 @@ transitGateways:
       - name: Network-Main-Core
         routes: []
       - name: Network-Main-Segregated
-        routes: []
+        routes:
+          - destinationCidrBlock: "0.0.0.0/0"
+            attachment:
+              account: Network
+              vpcName: Egress
+          - destinationCidrBlock: {{ VpcDevelopmentCidr }}
+            blackhole: true
+          - destinationCidrBlock: {{ VpcStagingCidr }}
+            blackhole: true
+          - destinationCidrBlock: {{ VpcProductionCidr }}
+            blackhole: true
       - name: Network-Main-Shared
-        routes: []
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Egress
+              account: Network
       - name: Network-Main-Standalone
         routes: []
 centralNetworkServices:
@@ -72,6 +83,21 @@ centralNetworkServices:
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
   route53Resolver:
     endpoints:
+      - name: EndpointInbound
+        type: INBOUND
+        vpc: Egress
+        allowedCidrs:
+          - {{ AwsCidr }}
+        subnets:
+          - Egress-A
+          - Egress-B
+        rules:
+          - name: "{{ AcceleratorPrefix }}-Endpoint-local"
+            domainName: {{ InternalDnsName }}
+            targetIps:
+              - ip: 1.1.1.1
+              # port: '5353' # only include if targeting a non-standard DNS port
+              - ip: 2.2.2.2
       - name: EndpointOutbound
         type: OUTBOUND
         vpc: Egress
@@ -111,7 +137,19 @@ centralNetworkServices:
         shareTargets:
           organizationalUnits:
             - Infrastructure
-
+prefixLists:
+  - addressFamily: IPv4
+    entries:
+      - "{{ OnPremisesPrefixList }}"
+    maxEntries: 1100
+    name: onpremsises-prefix-list
+    deploymentTargets:
+      organizationalUnits:
+        - Infrastructure
+        - Portal/Development
+        - Portal/Staging
+        - Portal/Production
+  
 vpcs:
   - name: Egress
     tags:
