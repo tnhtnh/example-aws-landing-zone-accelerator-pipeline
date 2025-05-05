@@ -91,13 +91,6 @@ centralNetworkServices:
         subnets:
           - Egress-A
           - Egress-B
-        rules:
-          - name: "{{ AcceleratorPrefix }}-Endpoint-local"
-            domainName: {{ InternalDnsName }}
-            targetIps:
-              - ip: 1.1.1.1
-              # port: '5353' # only include if targeting a non-standard DNS port
-              - ip: 2.2.2.2
       - name: EndpointOutbound
         type: OUTBOUND
         vpc: Egress
@@ -114,8 +107,9 @@ centralNetworkServices:
               # port: '5353' # only include if targeting a non-standard DNS port
               - ip: 2.2.2.2
             shareTargets:
-              accounts:
-                - Network
+              organizationalUnits:
+                - Infrastructure
+                - Portal
     queryLogs:
       name: "{{ AcceleratorPrefix }}-query-logs"
       destinations:
