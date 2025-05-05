@@ -149,7 +149,7 @@ prefixLists:
         - Portal/Development
         - Portal/Staging
         - Portal/Production
-  
+
 vpcs:
   - name: Egress
     tags:
