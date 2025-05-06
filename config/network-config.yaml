@@ -1,18 +1,27 @@
+homeRegion: &HOME_REGION ap-southeast-2
+#####################################
+# Delete default VPCs-- use this    #
+# object to delete default VPCs in  #
+# any non-excluded accounts         #
+#####################################
 defaultVpc:
-  delete: false
+  delete: true
   excludeAccounts: []
-endpointPolicies:
-  - name: Default
-    document: vpc-endpoint-policies/default.json
-  - name: EC2
-    document: vpc-endpoint-policies/ec2.json
+
+#####################################
+# Transit Gateways-- use this object #
+# to deploy transit gateways         #
+#####################################
 transitGateways:
   - name: Network-Main
     account: Network
-    region: ap-southeast-2
+    region: *HOME_REGION
     shareTargets:
       organizationalUnits:
         - Infrastructure
+        - Portal
+
+
     asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
@@ -22,28 +31,104 @@ transitGateways:
     routeTables:
       - name: Network-Main-Core
         routes: []
-      - name: Network-Main-Segregated
-        routes:
-          - destinationCidrBlock: "0.0.0.0/0"
-            attachment:
-              account: Network
-              vpcName: Egress
-          - destinationCidrBlock: {{ VpcDevelopmentCidr }}
-            blackhole: true
-          - destinationCidrBlock: {{ VpcStagingCidr }}
-            blackhole: true
-          - destinationCidrBlock: {{ VpcProductionCidr }}
-            blackhole: true
-      - name: Network-Main-Shared
+      - name: Network-Main-Spoke
         routes:
           - destinationCidrBlock: 0.0.0.0/0
             attachment:
-              vpcName: Egress
+              vpcName: Network-Inspection
               account: Network
-      - name: Network-Main-Standalone
-        routes: []
+
 centralNetworkServices:
   delegatedAdminAccount: Network
+  networkFirewall:
+    firewalls:
+      - name: accelerator-firewall
+        firewallPolicy: accelerator-policy
+        subnets:
+          - Network-Inspection-A
+          - Network-Inspection-B
+        vpc: Network-Inspection
+        loggingConfiguration:
+          # - destination: s3
+          - destination: cloud-watch-logs
+            type: ALERT
+          - destination: cloud-watch-logs
+            type: FLOW
+    policies:
+      - name: accelerator-policy
+        regions:
+          - *HOME_REGION
+        firewallPolicy:
+          statelessDefaultActions: ["aws:forward_to_sfe"]
+          statelessFragmentDefaultActions: ["aws:forward_to_sfe"]
+          statefulRuleGroups:
+            - name: accelerator-rule-group
+            - name: domain-list-group
+        shareTargets:
+          organizationalUnits:
+            - Infrastructure
+    rules:
+      - name: accelerator-rule-group
+        regions:
+          - *HOME_REGION
+        capacity: 100
+        type: STATEFUL
+        ruleGroup:
+          rulesSource:
+            statefulRules:
+              # Block traffic between production VPCs
+              - action: DROP
+                header:
+                  destination: 10.4.0.0/22
+                  destinationPort: ANY
+                  direction: ANY
+                  protocol: IP
+                  source: 10.5.0.0/22
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: sid
+                    settings: ["100"]
+
+              - action: ALERT
+                header:
+                  destination: 8.8.8.8/32
+                  destinationPort: ANY
+                  direction: FORWARD
+                  protocol: TCP
+                  source: ANY
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: msg
+                    settings: ['"example message"']
+                  - keyword: sid
+                    settings: ["102"]
+
+      - name: domain-list-group
+        regions:
+          - *HOME_REGION
+        capacity: 10
+        type: STATEFUL
+        ruleGroup:
+          rulesSource:
+            rulesSourceList:
+              generatedRulesType: DENYLIST
+              # Add/Modify the domain list per business needs.
+              targets: [".google.com"]
+              targetTypes: ["TLS_SNI", "HTTP_HOST"]
+          ruleVariables:
+            ipSets:
+              name: HOME_NET
+              definition:
+                - 10.1.0.0/22
+                - 10.2.0.0/22
+                - 10.3.0.0/22
+                - 10.4.0.0/22
+                - 10.5.0.0/22
+            portSets:
+              name: HOME_NET
+              definition:
+                - "80"
+                - "443"
   ipams:
     - name: "{{ AcceleratorPrefix }}-ipam"
       region: "{{ AcceleratorHomeRegion }}"
@@ -82,47 +167,34 @@ centralNetworkServices:
               - Customer/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
   route53Resolver:
-    endpoints:
-      - name: EndpointInbound
-        type: INBOUND
-        vpc: Egress
-        allowedCidrs:
-          - {{ AwsCidr }}
-        subnets:
-          - Egress-A
-          - Egress-B
-      - name: EndpointOutbound
-        type: OUTBOUND
-        vpc: Egress
-        allowedCidrs:
-          - {{ AwsCidr }}
-        subnets:
-          - Egress-A
-          - Egress-B
-        rules:
-          - name: "{{ AcceleratorPrefix }}-Endpoint-local"
-            domainName: {{ InternalDnsName }}
-            targetIps:
-              - ip: 1.1.1.1
-              # port: '5353' # only include if targeting a non-standard DNS port
-              - ip: 2.2.2.2
-            shareTargets:
-              organizationalUnits:
-                - Infrastructure
-                - Portal
+    endpoints: []
     queryLogs:
-      name: "{{ AcceleratorPrefix }}-query-logs"
+      name: accelerator-query-logs
       destinations:
         - s3
         - cloud-watch-logs
       shareTargets:
         organizationalUnits:
           - Infrastructure
+          - Portal
+
     firewallRuleGroups:
       - name: accelerator-block-group
         regions:
-          - {{ AcceleratorHomeRegion }}
+          - *HOME_REGION
         rules:
+          - name: nxdomain-block-rule
+            action: BLOCK
+            customDomainList: dns-firewall-domain-lists/domain-list-1.txt
+            priority: 100
+            blockResponse: NXDOMAIN
+          - name: override-block-rule
+            action: BLOCK
+            customDomainList: dns-firewall-domain-lists/domain-list-2.txt
+            priority: 200
+            blockResponse: OVERRIDE
+            blockOverrideDomain: amazon.com
+            blockOverrideTtl: 3600
           - name: managed-rule
             action: BLOCK
             managedDomainList: AWSManagedDomainsBotnetCommandandControl
@@ -131,6 +203,383 @@ centralNetworkServices:
         shareTargets:
           organizationalUnits:
             - Infrastructure
+            - Portal
+
+endpointPolicies:
+  - name: Default
+    document: vpc-endpoint-policies/default.json
+  - name: Ec2
+    document: vpc-endpoint-policies/ec2.json
+
+vpcs:
+  - name: Network-Endpoints
+    account: Network
+    region: *HOME_REGION
+    cidrs:
+      - 10.1.0.0/22
+    internetGateway: false
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    queryLogs:
+      - accelerator-query-logs
+
+    dnsFirewallRuleGroups:
+      - name: accelerator-block-group
+        priority: 101
+
+    routeTables:
+      - name: Network-EndpointsTgwAttach-A
+        routes: []
+      - name: Network-EndpointsTgwAttach-B
+        routes: []
+      - name: Network-Endpoints-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Network-Endpoints-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+    subnets:
+      - name: Network-Endpoints-A
+        availabilityZone: a
+        routeTable: Network-Endpoints-A
+        ipv4CidrBlock: 10.1.0.0/24
+      - name: Network-Endpoints-B
+        availabilityZone: b
+        routeTable: Network-Endpoints-B
+        ipv4CidrBlock: 10.1.1.0/24
+
+      - name: Network-EndpointsTgwAttach-A
+        availabilityZone: a
+        routeTable: Network-EndpointsTgwAttach-A
+        ipv4CidrBlock: 10.1.3.208/28
+      - name: Network-EndpointsTgwAttach-B
+        availabilityZone: b
+        routeTable: Network-EndpointsTgwAttach-B
+        ipv4CidrBlock: 10.1.3.224/28
+
+    transitGatewayAttachments:
+      - name: Network-Endpoints
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Core
+        routeTablePropagations:
+          - Network-Main-Spoke
+          - Network-Main-Core
+        subnets:
+          - Network-EndpointsTgwAttach-A
+          - Network-EndpointsTgwAttach-B
+
+    interfaceEndpoints:
+      central: true
+      defaultPolicy: Default
+      subnets:
+        - Network-Endpoints-A
+        - Network-Endpoints-B
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+
+  - name: Network-Inspection
+    account: Network
+    region: *HOME_REGION
+    cidrs:
+      - 10.2.0.0/22
+    internetGateway: true
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: true
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    queryLogs:
+      - accelerator-query-logs
+
+    natGateways:
+      - name: Nat-Network-Inspection-A
+        subnet: Network-Inspection-Pub-A
+      - name: Nat-Network-Inspection-B
+        subnet: Network-Inspection-Pub-B
+
+    routeTables:
+      - name: Network-InspectionTgwAttach-A
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: accelerator-firewall
+            targetAvailabilityZone: a
+      - name: Network-InspectionTgwAttach-B
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: accelerator-firewall
+            targetAvailabilityZone: b
+
+      - name: Network-Inspection-A
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Inspection-A
+          - name: TgwRoute
+            destination: 10.0.0.0/8
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Network-Inspection-B
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Inspection-B
+          - name: TgwRoute
+            destination: 10.0.0.0/8
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+      - name: Network-Inspection-Pub-A
+        routes:
+          - name: NfwRoute
+            destination: 10.0.0.0/8
+            type: networkFirewall
+            target: accelerator-firewall
+            targetAvailabilityZone: a
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Network-Inspection-Pub-B
+        routes:
+          - name: NfwRoute
+            destination: 10.0.0.0/8
+            type: networkFirewall
+            target: accelerator-firewall
+            targetAvailabilityZone: b
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+
+    subnets:
+      - name: Network-Inspection-A
+        availabilityZone: a
+        routeTable: Network-Inspection-A
+        ipv4CidrBlock: 10.2.0.0/24
+      - name: Network-Inspection-B
+        availabilityZone: b
+        routeTable: Network-Inspection-B
+        ipv4CidrBlock: 10.2.1.0/24
+
+      - name: Network-InspectionTgwAttach-A
+        availabilityZone: a
+        routeTable: Network-InspectionTgwAttach-A
+        ipv4CidrBlock: 10.2.3.208/28
+      - name: Network-InspectionTgwAttach-B
+        availabilityZone: b
+        routeTable: Network-InspectionTgwAttach-B
+        ipv4CidrBlock: 10.2.3.224/28
+
+      - name: Network-Inspection-Pub-A
+        availabilityZone: a
+        routeTable: Network-Inspection-Pub-A
+        ipv4CidrBlock: 10.2.3.176/28
+      - name: Network-Inspection-Pub-B
+        availabilityZone: b
+        routeTable: Network-Inspection-Pub-B
+        ipv4CidrBlock: 10.2.3.192/28
+
+    transitGatewayAttachments:
+      - name: Network-Inspection
+        transitGateway:
+          name: Network-Main
+          account: Network
+        options:
+          applianceModeSupport: enable
+        routeTableAssociations:
+          - Network-Main-Core
+        routeTablePropagations: []
+        subnets:
+          - Network-InspectionTgwAttach-A
+          - Network-InspectionTgwAttach-B
+
+
+  - name: Portal-Development
+    account: PortalDevelopment 
+    region: *HOME_REGION
+    cidrs:
+      - 10.4.0.0/22
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: true
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    queryLogs:
+      - accelerator-query-logs
+
+    dnsFirewallRuleGroups:
+      - name: accelerator-block-group
+        priority: 101
+
+    routeTables:
+      - name: Workload1-Tgw-A
+        routes: []
+      - name: Workload1-Tgw-B
+        routes: []
+
+      - name: Workload1-App-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Workload1-App-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+    subnets:
+      - name: Workload1-App-A
+        availabilityZone: a
+        routeTable: Workload1-App-A
+        ipv4CidrBlock: 10.4.0.0/24
+      - name: Workload1-App-B
+        availabilityZone: b
+        routeTable: Workload1-App-B
+        ipv4CidrBlock: 10.4.1.0/24
+
+      - name: Workload1-MainTgwAttach-A
+        availabilityZone: a
+        routeTable: Workload1-Tgw-A
+        ipv4CidrBlock: 10.4.3.208/28
+      - name: Workload1-MainTgwAttach-B
+        availabilityZone: b
+        routeTable: Workload1-Tgw-B
+        ipv4CidrBlock: 10.4.3.224/28
+
+    transitGatewayAttachments:
+      - name: Workload1-Main
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Spoke
+        routeTablePropagations:
+          - Network-Main-Core
+        subnets:
+          - Workload1-MainTgwAttach-A
+          - Workload1-MainTgwAttach-B
+
+vpcFlowLogs:
+  trafficType: ALL
+  maxAggregationInterval: 600
+  destinations:
+    - s3
+    - cloud-watch-logs
+  destinationsConfig:
+    s3:
+      lifecycleRules: []
+    cloudWatchLogs:
+      retentionInDays: 3653
+  defaultFormat: false
+  customFields:
+    - version
+    - account-id
+    - interface-id
+    - srcaddr
+    - dstaddr
+    - srcport
+    - dstport
+    - protocol
+    - packets
+    - bytes
+    - start
+    - end
+    - action
+    - log-status
+    - vpc-id
+    - subnet-id
+    - instance-id
+    - tcp-flags
+    - type
+    - pkt-srcaddr
+    - pkt-dstaddr
+    - region
+    - az-id
+    - pkt-src-aws-service
+    - pkt-dst-aws-service
+    - flow-direction
+    - traffic-path
+
 prefixLists:
   - addressFamily: IPv4
     entries:
@@ -143,134 +592,3 @@ prefixLists:
         - Portal/Development
         - Portal/Staging
         - Portal/Production
-
-vpcs:
-  - name: Egress
-    tags:
-      - key: Name
-        value: Egress
-    account: Network
-    region: "{{ AcceleratorHomeRegion }}"
-    cidrs:
-      - {{ CentralEgressCidr }}
-    defaultSecurityGroupRulesDeletion: true
-    internetGateway: true
-    enableDnsHostnames: true
-    enableDnsSupport: true
-    instanceTenancy: default
-    queryLogs:
-      - "{{ AcceleratorPrefix }}-query-logs"
-    routeTables:
-      - name: Egress
-        routes:
-          - name: S3Gateway
-            type: gatewayEndpoint
-            target: s3
-          - name: DynamoDBGateway
-            type: gatewayEndpoint
-            target: dynamodb
-          - name: DefaultRoute
-            destination: "0.0.0.0/0"
-            type: internetGateway
-      - name: TgwAttachmentRouteTable
-        routes:
-          - name: DefaultRoute
-            destination: "0.0.0.0/0"
-            type: internetGateway
-    subnets:
-      - name: Egress-A
-        availabilityZone: a
-        routeTable: Egress
-        ipv4CidrBlock: "{{ CentralEgressPublicSubnetACidr }}"
-      - name: Egress-B
-        availabilityZone: b
-        routeTable: Egress
-        ipv4CidrBlock: "{{ CentralEgressPublicSubnetBCidr }}"
-      - name: EgressTgwAttach-A
-        availabilityZone: a
-        routeTable: TgwAttachmentRouteTable
-        ipv4CidrBlock: "{{ CentralEgressInternalSubnetACidr }}"
-      - name: EgressTgwAttach-B
-        availabilityZone: b
-        routeTable: TgwAttachmentRouteTable
-        ipv4CidrBlock: "{{ CentralEgressInternalSubnetBCidr }}"
-    gatewayEndpoints:
-      defaultPolicy: Default
-      endpoints:
-        - service: s3
-        - service: dynamodb
-    interfaceEndpoints:
-      central: true
-      defaultPolicy: Default
-      subnets:
-        - Egress-A
-        - Egress-B
-      endpoints:
-        - service: ec2
-        - service: ec2messages
-        - service: ssm
-        - service: ssmmessages
-        - service: kms
-        - service: logs
-        - service: cloudformation
-        - service: secretsmanager
-        - service: monitoring
-        - service: access-analyzer
-        - service: acm-pca
-        - service: application-autoscaling
-        - service: athena
-        - service: autoscaling
-        - service: autoscaling-plans
-        - service: awsconnector
-        - service: cloudtrail
-        - service: codebuild
-        - service: codecommit
-        - service: codepipeline
-        - service: config
-        - service: ebs
-        - service: ecr.api
-        - service: ecr.dkr
-        - service: ecs
-        - service: ecs-agent
-        - service: ecs-telemetry
-        - service: elasticbeanstalk
-        - service: elasticbeanstalk-health
-        - service: elasticfilesystem
-        - service: elasticloadbalancing
-        - service: elasticmapreduce
-        - service: events
-        - service: execute-api
-        - service: sns
-        - service: sqs
-        - service: sts
-    transitGatewayAttachments:
-      - name: EgressVpcAttachment
-        transitGateway:
-          name: Network-Main
-          account: Network
-        subnets:
-          - EgressTgwAttach-A
-          - EgressTgwAttach-B
-        routeTableAssociations:
-          - Network-Main-Shared
-        routeTablePropagations:
-          - Network-Main-Core
-          - Network-Main-Segregated
-          - Network-Main-Shared
-          - Network-Main-Standalone
-vpcTemplates:
-  - name: Customer-VPC-Template
-    deploymentTargets:
-      organizationalUnits:
-        - Customer/Accounts
-    region: ap-southeast-2
-    ipamAllocations:
-      - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
-        netmaskLength: 24
-    enableDnsHostnames: true
-    enableDnsSupport: true
-    instanceTenancy: default
-    routeTables: []
-    subnets: []
-    natGateways: []
-    transitGatewayAttachments: []

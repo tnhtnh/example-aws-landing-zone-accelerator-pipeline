@@ -42,6 +42,12 @@ serviceControlPolicies:
     type: customerManaged
     deploymentTargets:
       organizationalUnits: []
-taggingPolicies: []
+taggingPolicies:
+  - name: TagPolicy
+    description: Organization Tagging Policy
+    policy: tagging-policies/org-tag-policy.json
+    deploymentTargets:
+      organizationalUnits:
+        - Root
 chatbotPolicies: []
 backupPolicies: []
