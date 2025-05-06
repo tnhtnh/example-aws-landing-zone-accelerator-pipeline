@@ -109,7 +109,7 @@ centralNetworkServices:
             shareTargets:
               organizationalUnits:
                 - Infrastructure
-                - Portal
+                - Portal 
     queryLogs:
       name: "{{ AcceleratorPrefix }}-query-logs"
       destinations:
@@ -135,7 +135,7 @@ prefixLists:
   - addressFamily: IPv4
     entries:
       - "{{ OnPremisesPrefixList }}"
-    maxEntries: 1100
+    maxEntries: 100
     name: onpremsises-prefix-list
     deploymentTargets:
       organizationalUnits:
