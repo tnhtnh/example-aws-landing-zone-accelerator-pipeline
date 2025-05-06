@@ -176,7 +176,9 @@ centralNetworkServices:
       shareTargets:
         organizationalUnits:
           - Infrastructure
-          - Portal
+          - Portal/Development
+          - Portal/Staging
+          - Portal/Production
 
     firewallRuleGroups:
       - name: accelerator-block-group
@@ -203,7 +205,9 @@ centralNetworkServices:
         shareTargets:
           organizationalUnits:
             - Infrastructure
-            - Portal
+            - Portal/Development
+            - Portal/Staging
+            - Portal/Production
 
 endpointPolicies:
   - name: Default
