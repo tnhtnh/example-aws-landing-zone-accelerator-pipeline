@@ -3,25 +3,16 @@
       "Owner": {
         "tag_key": {
           "@@assign": "Owner"
-        },
-        "tag_value": {
-          "@@assign": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
         }
       },
       "System": {
         "tag_key": {
           "@@assign": "System"
-        },
-        "tag_value": {
-          "@@assign": "^[a-zA-Z][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]$"
         }
       },
       "Component": {
         "tag_key": {
           "@@assign": "Component"
-        },
-        "tag_value": {
-          "@@assign": "^[a-zA-Z][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]$"
         }
       },
       "DataClassification": {
