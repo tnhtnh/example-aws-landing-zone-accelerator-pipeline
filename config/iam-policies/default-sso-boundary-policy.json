@@ -48,50 +48,6 @@
 				"kms:GenerateDataKeyWithoutPlaintext"
 			],
 			"Resource": "*"
-		},
-		{
-			"Sid": "AllowRoleCreationWithAttachedPermissionsBoundary",
-			"Effect": "Allow",
-			"Action": "iam:CreateRole",
-			"Resource": "*",
-			"Condition": {
-				"StringEquals": {
-					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
-				}
-			}
-		},
-		{
-			"Sid": "DenyRoleCreationWithoutBoundary",
-			"Effect": "Deny",
-			"Action": "iam:CreateRole",
-			"Resource": "*",
-			"Condition": {
-				"StringNotEquals": {
-					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
-				}
-			}
-		},
-		{
-			"Sid": "DenyPermissionsBoundaryDeletion",
-			"Effect": "Deny",
-			"Action": "iam:DeleteRolePermissionsBoundary",
-			"Resource": "*",
-			"Condition": {
-				"StringEquals": {
-					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
-				}
-			}
-		},
-		{
-			"Sid": "DenyPolicyChange",
-			"Effect": "Deny",
-			"Action": [
-				"iam:CreatePolicyVersion",
-				"iam:DeletePolicyVersion",
-				"iam:DetachRolePolicy",
-				"iam:SetDefaultPolicyVersion"
-			],
-			"Resource": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
 		}
 	]
 }
