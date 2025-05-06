@@ -109,7 +109,7 @@ centralNetworkServices:
             shareTargets:
               organizationalUnits:
                 - Infrastructure
-                - Portal 
+                - Portal
     queryLogs:
       name: "{{ AcceleratorPrefix }}-query-logs"
       destinations:
