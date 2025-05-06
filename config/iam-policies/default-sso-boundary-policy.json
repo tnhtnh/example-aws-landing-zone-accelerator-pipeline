@@ -1,97 +1,97 @@
 {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Sid": "AllowAllActionsExceptThoseDenied",
-        "Effect": "Allow",
-        "Action": "*",
-        "Resource": "*"
-      },
-      {
-        "Sid": "DenyIamUserGroupManagement",
-        "Effect": "Deny",
-        "Action": [
-          "iam:AttachUserPolicy",
-          "iam:CreateUser",
-          "iam:CreateLoginProfile",
-          "iam:CreateAccessKey",
-          "iam:DeleteUser",
-          "iam:DeleteUserPermissionsBoundary",
-          "iam:DeleteUserPolicy",
-          "iam:DeleteLoginProfile",
-          "iam:DeleteAccessKey",
-          "iam:DetachUserPolicy",
-          "iam:PutUserPermissionsBoundary",
-          "iam:PutUserPolicy",
-          "iam:UpdateUser",
-          "iam:UpdateLoginProfile",
-          "iam:UpdateAccessKey",
-          "iam:AddUserToGroup",
-          "iam:AttachGroupPolicy",
-          "iam:CreateGroup",
-          "iam:DeleteGroup",
-          "iam:DeleteGroupPolicy",
-          "iam:DetachGroupPolicy",
-          "iam:PutGroupPolicy",
-          "iam:RemoveUserFromGroup",
-          "iam:UpdateGroup"
-        ],
-        "Resource": "*"
-      },
-      {
-        "Sid": "DenyKeyCreation",
-        "Effect": "Deny",
-        "Action": [
-          "kms:CreateKey",
-          "kms:CreateAlias",
-          "kms:GenerateDataKey",
-          "kms:GenerateDataKeyWithoutPlaintext"
-        ],
-        "Resource": "*"
-      },
-      {
-        "Sid": "AllowRoleCreationWithAttachedPermissionsBoundary",
-        "Effect": "Allow",
-        "Action": "iam:CreateRole",
-        "Resource": "*",
-        "Condition": {
-          "StringEquals": {
-            "iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Deafult-Boundary-Policy"
-          }
-        }
-      },
-      {
-        "Sid": "DenyRoleCreationWithoutBoundary",
-        "Effect": "Deny",
-        "Action": "iam:CreateRole",
-        "Resource": "*",
-        "Condition": {
-          "StringNotEquals": {
-            "iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Deafult-Boundary-Policy"
-          }
-        }
-      },
-      {
-        "Sid": "DenyPermissionsBoundaryDeletion",
-        "Effect": "Deny",
-        "Action": "iam:DeleteRolePermissionsBoundary",
-        "Resource": "*",
-        "Condition": {
-          "StringEquals": {
-            "iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Deafult-Boundary-Policy"
-          }
-        }
-      },
-      {
-        "Sid": "DenyPolicyChange",
-        "Effect": "Deny", 
-        "Action": [
-          "iam:CreatePolicyVersion",
-          "iam:DeletePolicyVersion",
-          "iam:DetachRolePolicy",
-          "iam:SetDefaultPolicyVersion"
-        ],
-        "Resource": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Deafult-Boundary-Policy"
-      }
-    ]
-  }
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "AllowAllActionsExceptThoseDenied",
+			"Effect": "Allow",
+			"Action": "*",
+			"Resource": "*"
+		},
+		{
+			"Sid": "DenyIamUserGroupManagement",
+			"Effect": "Deny",
+			"Action": [
+				"iam:AttachUserPolicy",
+				"iam:CreateUser",
+				"iam:CreateLoginProfile",
+				"iam:CreateAccessKey",
+				"iam:DeleteUser",
+				"iam:DeleteUserPermissionsBoundary",
+				"iam:DeleteUserPolicy",
+				"iam:DeleteLoginProfile",
+				"iam:DeleteAccessKey",
+				"iam:DetachUserPolicy",
+				"iam:PutUserPermissionsBoundary",
+				"iam:PutUserPolicy",
+				"iam:UpdateUser",
+				"iam:UpdateLoginProfile",
+				"iam:UpdateAccessKey",
+				"iam:AddUserToGroup",
+				"iam:AttachGroupPolicy",
+				"iam:CreateGroup",
+				"iam:DeleteGroup",
+				"iam:DeleteGroupPolicy",
+				"iam:DetachGroupPolicy",
+				"iam:PutGroupPolicy",
+				"iam:RemoveUserFromGroup",
+				"iam:UpdateGroup"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "DenyKeyCreation",
+			"Effect": "Deny",
+			"Action": [
+				"kms:CreateKey",
+				"kms:CreateAlias",
+				"kms:GenerateDataKey",
+				"kms:GenerateDataKeyWithoutPlaintext"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "AllowRoleCreationWithAttachedPermissionsBoundary",
+			"Effect": "Allow",
+			"Action": "iam:CreateRole",
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
+				}
+			}
+		},
+		{
+			"Sid": "DenyRoleCreationWithoutBoundary",
+			"Effect": "Deny",
+			"Action": "iam:CreateRole",
+			"Resource": "*",
+			"Condition": {
+				"StringNotEquals": {
+					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
+				}
+			}
+		},
+		{
+			"Sid": "DenyPermissionsBoundaryDeletion",
+			"Effect": "Deny",
+			"Action": "iam:DeleteRolePermissionsBoundary",
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"iam:PermissionsBoundary": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
+				}
+			}
+		},
+		{
+			"Sid": "DenyPolicyChange",
+			"Effect": "Deny",
+			"Action": [
+				"iam:CreatePolicyVersion",
+				"iam:DeletePolicyVersion",
+				"iam:DetachRolePolicy",
+				"iam:SetDefaultPolicyVersion"
+			],
+			"Resource": "arn:aws:iam::${aws:accountId}:policy/LZ-BP-Default-Boundary-Policy"
+		}
+	]
+}
