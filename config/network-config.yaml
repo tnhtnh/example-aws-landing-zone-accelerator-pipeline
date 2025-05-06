@@ -454,7 +454,7 @@ vpcs:
 
 
   - name: Portal-Development
-    account: PortalDevelopment 
+    account: PortalDevelopment
     region: *HOME_REGION
     cidrs:
       - 10.4.0.0/22
