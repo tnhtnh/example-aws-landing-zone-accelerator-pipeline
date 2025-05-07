@@ -32,11 +32,11 @@ workloadAccounts:
     description: The Portal Development account is used for the Portal Development environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
     email: bjsslztest+new-portal-development@gmail.com
     organizationalUnit: Portal/Development
-  - name: Portal/Staging
+  - name: PortalStaging
     description: The Portal Staging account is used for the Portal Staging environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
     email: bjsslztest+new-portal-staging@gmail.com
     organizationalUnit: Portal/Staging
-  - name: Portal/Production
+  - name: PortalProduction
     description: The Portal Production account is used for the Portal Production environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
     email: bjsslztest+new-portal-production@gmail.com
     organizationalUnit: Portal/Production
