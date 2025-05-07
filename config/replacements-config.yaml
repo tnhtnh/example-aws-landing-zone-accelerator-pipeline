@@ -84,3 +84,24 @@ globalReplacements:
   - key: OnPremisesPrefixList
     type: String
     value: 10.0.0.0/9
+  - key: PortalDevelopmentCidr
+    type: String
+    value: 10.132.0.0/18
+  - key: PortalDevelopmentPublicAzACidr
+    type: String
+    value: 10.132.0.0/26
+  - key: PortalDevelopmentPublicAzBCidr
+    type: String
+    value: 10.132.0.64/26
+  - key: PortalDevelopmentPublicAzCCidr
+    type: String
+    value: 10.132.0.128/26
+  - key: PortalDevelopmentPrivateAzACidr
+    type: String
+    value: 10.132.32.0/21
+  - key: PortalDevelopmentPrivateAzBCidr
+    type: String
+    value: 10.132.40.0/21
+  - key: PortalDevelopmentPrivateAzCCidr
+    type: String
+    value: 10.132.48.0/21
