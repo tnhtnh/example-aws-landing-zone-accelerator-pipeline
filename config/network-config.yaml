@@ -263,6 +263,7 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: a
+
       - name: Network-EgressTgwAttach-B
         routes:
           - name: NfwRoute
@@ -279,7 +280,7 @@ vpcs:
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: c
 
-      - name: Network-Egress-A
+      - name: Network-Inspection-Egress-A
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
@@ -296,7 +297,7 @@ vpcs:
             type: gatewayEndpoint
             target: dynamodb
 
-      - name: Network-Egress-B
+      - name: Network-Inspection-Egress-B
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
@@ -313,7 +314,7 @@ vpcs:
             type: gatewayEndpoint
             target: dynamodb
 
-      - name: Network-Egress-C
+      - name: Network-Inspection-Egress-C
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
@@ -330,7 +331,7 @@ vpcs:
             type: gatewayEndpoint
             target: dynamodb
 
-      - name: Network-Inspection-Pub-A
+      - name: Network-Egress-Pub-A
         routes:
           - name: NfwRoute
             destination: {{ AwsCidr }}
@@ -341,7 +342,7 @@ vpcs:
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: Network-Inspection-Pub-B
+      - name: Network-Egress-Pub-B
         routes:
           - name: NfwRoute
             destination: {{ AwsCidr }}
@@ -352,7 +353,7 @@ vpcs:
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: Network-Inspection-Pub-C
+      - name: Network-Egress-Pub-C
         routes:
           - name: NfwRoute
             destination: {{ AwsCidr }}
@@ -364,17 +365,17 @@ vpcs:
             type: internetGateway
             target: IGW
     subnets:
-      - name: Network-Egress-A
+      - name: Network-Inspection-Egress-A
         availabilityZone: a
-        routeTable: Network-Egress-A
+        routeTable: Network-Inspection-Egress-A
         ipv4CidrBlock: {{ CentralEgressNFAzACidr }}
-      - name: Network-Egress-B
+      - name: Network-Inspection-Egress-B
         availabilityZone: b
-        routeTable: Network-Egress-B
+        routeTable: Network-Inspection-Egress-B
         ipv4CidrBlock: {{ CentralEgressNFAzBCidr }}
-      - name: Network-Egress-C
+      - name: Network-Inspection-Egress-C
         availabilityZone: c
-        routeTable: Network-Egress-C
+        routeTable: Network-Inspection-Egress-C
         ipv4CidrBlock: {{ CentralEgressNFAzCCidr }}
 
       - name: Network-EgressTgwAttach-A
@@ -436,10 +437,10 @@ vpcs:
         - service: dynamodb
 
     queryLogs:
-      - accelerator-query-logs
+      - "{{ AcceleratorPrefix }}-query-logs"
 
     dnsFirewallRuleGroups:
-      - name: accelerator-block-group
+      - name: "{{ AcceleratorPrefix }}-block-group"
         priority: 101
 
     routeTables:
@@ -498,7 +499,7 @@ vpcs:
           name: Network-Main
           account: Network
         routeTableAssociations:
-          - Network-Main-Spoke
+          - Network-Main-Development
         routeTablePropagations:
           - Network-Main-Core
         subnets:
