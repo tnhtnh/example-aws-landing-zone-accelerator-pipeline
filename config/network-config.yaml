@@ -55,9 +55,9 @@ centralNetworkServices:
       - name: "{{ AcceleratorPrefix }}-firewall"
         firewallPolicy: "{{ AcceleratorPrefix }}-policy"
         subnets:
-          - Network-Egress-A
-          - Network-Egress-B
-          - Network-Egress-C
+          - Network-Inspection-Egress-A
+          - Network-Inspection-Egress-B
+          - Network-Inspection-Egress-C
         vpc: Network-Egress
         loggingConfiguration:
           # - destination: s3
