@@ -20,8 +20,6 @@ transitGateways:
       organizationalUnits:
         - Infrastructure
         - Portal
-
-
     asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
@@ -172,7 +170,6 @@ centralNetworkServices:
       name: accelerator-query-logs
       destinations:
         - s3
-        - cloud-watch-logs
       shareTargets:
         organizationalUnits:
           - Infrastructure
@@ -216,106 +213,6 @@ endpointPolicies:
     document: vpc-endpoint-policies/ec2.json
 
 vpcs:
-  - name: Network-Endpoints
-    account: Network
-    region: *HOME_REGION
-    cidrs:
-      - 10.1.0.0/22
-    internetGateway: false
-    enableDnsHostnames: true
-    enableDnsSupport: true
-    instanceTenancy: default
-
-    gatewayEndpoints:
-      defaultPolicy: Default
-      endpoints:
-        - service: s3
-        - service: dynamodb
-
-    queryLogs:
-      - accelerator-query-logs
-
-    dnsFirewallRuleGroups:
-      - name: accelerator-block-group
-        priority: 101
-
-    routeTables:
-      - name: Network-EndpointsTgwAttach-A
-        routes: []
-      - name: Network-EndpointsTgwAttach-B
-        routes: []
-      - name: Network-Endpoints-A
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
-          - name: S3Gateway
-            type: gatewayEndpoint
-            target: s3
-          - name: DynamoDBGateway
-            type: gatewayEndpoint
-            target: dynamodb
-      - name: Network-Endpoints-B
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
-          - name: S3Gateway
-            type: gatewayEndpoint
-            target: s3
-          - name: DynamoDBGateway
-            type: gatewayEndpoint
-            target: dynamodb
-
-    subnets:
-      - name: Network-Endpoints-A
-        availabilityZone: a
-        routeTable: Network-Endpoints-A
-        ipv4CidrBlock: 10.1.0.0/24
-      - name: Network-Endpoints-B
-        availabilityZone: b
-        routeTable: Network-Endpoints-B
-        ipv4CidrBlock: 10.1.1.0/24
-
-      - name: Network-EndpointsTgwAttach-A
-        availabilityZone: a
-        routeTable: Network-EndpointsTgwAttach-A
-        ipv4CidrBlock: 10.1.3.208/28
-      - name: Network-EndpointsTgwAttach-B
-        availabilityZone: b
-        routeTable: Network-EndpointsTgwAttach-B
-        ipv4CidrBlock: 10.1.3.224/28
-
-    transitGatewayAttachments:
-      - name: Network-Endpoints
-        transitGateway:
-          name: Network-Main
-          account: Network
-        routeTableAssociations:
-          - Network-Main-Core
-        routeTablePropagations:
-          - Network-Main-Spoke
-          - Network-Main-Core
-        subnets:
-          - Network-EndpointsTgwAttach-A
-          - Network-EndpointsTgwAttach-B
-
-    interfaceEndpoints:
-      central: true
-      defaultPolicy: Default
-      subnets:
-        - Network-Endpoints-A
-        - Network-Endpoints-B
-      endpoints:
-        - service: ec2
-        - service: ec2messages
-        - service: ssm
-        - service: ssmmessages
-        - service: kms
-        - service: logs
-
   - name: Network-Inspection
     account: Network
     region: *HOME_REGION
@@ -325,7 +222,7 @@ vpcs:
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
-    useCentralEndpoints: true
+    useCentralEndpoints: false
 
     gatewayEndpoints:
       defaultPolicy: Default
@@ -465,7 +362,7 @@ vpcs:
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
-    useCentralEndpoints: true
+    useCentralEndpoints: false
 
     gatewayEndpoints:
       defaultPolicy: Default
@@ -548,7 +445,6 @@ vpcFlowLogs:
   maxAggregationInterval: 600
   destinations:
     - s3
-    - cloud-watch-logs
   destinationsConfig:
     s3:
       lifecycleRules: []
