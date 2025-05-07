@@ -395,8 +395,6 @@ vpcs:
         routeTable: Network-Egress-Pub-C
         ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
 
-
-
   - name: Portal-Development
     account: PortalDevelopment
     region: *HOME_REGION
