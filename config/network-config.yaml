@@ -404,20 +404,6 @@ vpcs:
         routeTable: Network-Egress-Pub-C
         ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
 
-    transitGatewayAttachments:
-      - name: Network-Inspection
-        transitGateway:
-          name: Network-Main
-          account: Network
-        options:
-          applianceModeSupport: enable
-        routeTableAssociations:
-          - Network-Main-Core
-        routeTablePropagations: []
-        subnets:
-          - Network-EgressTgwAttach-A
-          - Network-EgressTgwAttach-B
-          - Network-EgressTgwAttach-C
 
 
   - name: Portal-Development
