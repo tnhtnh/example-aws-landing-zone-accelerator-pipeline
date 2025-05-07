@@ -1,4 +1,4 @@
-homeRegion: &HOME_REGION ap-southeast-2
+homeRegion: &HOME_REGION {{ AcceleratorHomeRegion }}
 #####################################
 # Delete default VPCs-- use this    #
 # object to delete default VPCs in  #
@@ -29,23 +29,36 @@ transitGateways:
     routeTables:
       - name: Network-Main-Core
         routes: []
-      - name: Network-Main-Spoke
+      - name: Network-Main-Development
         routes:
           - destinationCidrBlock: 0.0.0.0/0
             attachment:
-              vpcName: Network-Inspection
+              vpcName: Network-Egress
+              account: Network
+      - name: Network-Main-Staging
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
+              account: Network
+      - name: Network-Main-Production
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
               account: Network
 
 centralNetworkServices:
   delegatedAdminAccount: Network
   networkFirewall:
     firewalls:
-      - name: accelerator-firewall
-        firewallPolicy: accelerator-policy
+      - name: "{{ AcceleratorPrefix }}-firewall"
+        firewallPolicy: "{{ AcceleratorPrefix }}-policy"
         subnets:
-          - Network-Inspection-A
-          - Network-Inspection-B
-        vpc: Network-Inspection
+          - Network-Egress-A
+          - Network-Egress-B
+          - Network-Egress-C
+        vpc: Network-Egress
         loggingConfiguration:
           # - destination: s3
           - destination: cloud-watch-logs
@@ -53,20 +66,20 @@ centralNetworkServices:
           - destination: cloud-watch-logs
             type: FLOW
     policies:
-      - name: accelerator-policy
+      - name: "{{ AcceleratorPrefix }}-policy"
         regions:
           - *HOME_REGION
         firewallPolicy:
           statelessDefaultActions: ["aws:forward_to_sfe"]
           statelessFragmentDefaultActions: ["aws:forward_to_sfe"]
           statefulRuleGroups:
-            - name: accelerator-rule-group
-            - name: domain-list-group
+            - name: "{{ AcceleratorPrefix }}-rule-group"
+            - name: "domain-list-group"
         shareTargets:
           organizationalUnits:
             - Infrastructure
     rules:
-      - name: accelerator-rule-group
+      - name: "{{ AcceleratorPrefix }}-rule-group"
         regions:
           - *HOME_REGION
         capacity: 100
@@ -129,7 +142,7 @@ centralNetworkServices:
                 - "443"
   ipams:
     - name: "{{ AcceleratorPrefix }}-ipam"
-      region: "{{ AcceleratorHomeRegion }}"
+      region: *HOME_REGION
       description: "{{ AcceleratorPrefix }} IPAM"
       operatingRegions:
         - ap-southeast-2
@@ -164,10 +177,11 @@ centralNetworkServices:
             organizationalUnits:
               - Customer/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
+
   route53Resolver:
     endpoints: []
     queryLogs:
-      name: accelerator-query-logs
+      name: "{{ AcceleratorPrefix }}-query-logs"
       destinations:
         - s3
       shareTargets:
@@ -178,7 +192,7 @@ centralNetworkServices:
           - Portal/Production
 
     firewallRuleGroups:
-      - name: accelerator-block-group
+      - name: "{{ AcceleratorPrefix }}-block-group"
         regions:
           - *HOME_REGION
         rules:
@@ -213,11 +227,11 @@ endpointPolicies:
     document: vpc-endpoint-policies/ec2.json
 
 vpcs:
-  - name: Network-Inspection
+  - name: Network-Egress
     account: Network
     region: *HOME_REGION
     cidrs:
-      - 10.2.0.0/22
+      - {{ CentralEgressCidr }}
     internetGateway: true
     enableDnsHostnames: true
     enableDnsSupport: true
@@ -231,38 +245,48 @@ vpcs:
         - service: dynamodb
 
     queryLogs:
-      - accelerator-query-logs
+      - "{{ AcceleratorPrefix }}-query-logs"
 
     natGateways:
-      - name: Nat-Network-Inspection-A
-        subnet: Network-Inspection-Pub-A
-      - name: Nat-Network-Inspection-B
-        subnet: Network-Inspection-Pub-B
+      - name: Nat-Network-Egress-A
+        subnet: Network-Egress-Pub-A
+      - name: Nat-Network-Egress-B
+        subnet: Network-Egress-Pub-B
+      - name: Nat-Network-Egress-C
+        subnet: Network-Egress-Pub-C
 
     routeTables:
-      - name: Network-InspectionTgwAttach-A
+      - name: Network-EgressTgwAttach-A
         routes:
           - name: NfwRoute
             destination: 0.0.0.0/0
             type: networkFirewall
-            target: accelerator-firewall
+            target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: a
-      - name: Network-InspectionTgwAttach-B
+      - name: Network-EgressTgwAttach-B
         routes:
           - name: NfwRoute
             destination: 0.0.0.0/0
             type: networkFirewall
-            target: accelerator-firewall
+            target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: b
 
-      - name: Network-Inspection-A
+      - name: Network-EgressTgwAttach-C
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: c
+
+      - name: Network-Egress-A
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-Network-Inspection-A
+            target: Nat-Network-Egress-A
           - name: TgwRoute
-            destination: 10.0.0.0/8
+            destination: {{ AwsCidr }}
             type: transitGateway
             target: Network-Main
           - name: S3Gateway
@@ -271,14 +295,32 @@ vpcs:
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: Network-Inspection-B
+
+      - name: Network-Egress-B
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-Network-Inspection-B
+            target: Nat-Network-Egress-B
           - name: TgwRoute
-            destination: 10.0.0.0/8
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+      - name: Network-Egress-C
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Egress-C
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
             type: transitGateway
             target: Network-Main
           - name: S3Gateway
@@ -291,9 +333,9 @@ vpcs:
       - name: Network-Inspection-Pub-A
         routes:
           - name: NfwRoute
-            destination: 10.0.0.0/8
+            destination: {{ AwsCidr }}
             type: networkFirewall
-            target: accelerator-firewall
+            target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: a
           - name: IgwRoute
             destination: 0.0.0.0/0
@@ -302,42 +344,64 @@ vpcs:
       - name: Network-Inspection-Pub-B
         routes:
           - name: NfwRoute
-            destination: 10.0.0.0/8
+            destination: {{ AwsCidr }}
             type: networkFirewall
-            target: accelerator-firewall
+            target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: b
           - name: IgwRoute
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-
+      - name: Network-Inspection-Pub-C
+        routes:
+          - name: NfwRoute
+            destination: {{ AwsCidr }}
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: c
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
     subnets:
-      - name: Network-Inspection-A
+      - name: Network-Egress-A
         availabilityZone: a
-        routeTable: Network-Inspection-A
-        ipv4CidrBlock: 10.2.0.0/24
-      - name: Network-Inspection-B
+        routeTable: Network-Egress-A
+        ipv4CidrBlock: {{ CentralEgressNFAzACidr }}
+      - name: Network-Egress-B
         availabilityZone: b
-        routeTable: Network-Inspection-B
-        ipv4CidrBlock: 10.2.1.0/24
+        routeTable: Network-Egress-B
+        ipv4CidrBlock: {{ CentralEgressNFAzBCidr }}
+      - name: Network-Egress-C
+        availabilityZone: c
+        routeTable: Network-Egress-C
+        ipv4CidrBlock: {{ CentralEgressNFAzCCidr }}
 
-      - name: Network-InspectionTgwAttach-A
+      - name: Network-EgressTgwAttach-A
         availabilityZone: a
-        routeTable: Network-InspectionTgwAttach-A
-        ipv4CidrBlock: 10.2.3.208/28
-      - name: Network-InspectionTgwAttach-B
+        routeTable: Network-EgressTgwAttach-A
+        ipv4CidrBlock: {{ CentralEgressTgwAzACidr }}
+      - name: Network-EgressTgwAttach-B
         availabilityZone: b
-        routeTable: Network-InspectionTgwAttach-B
-        ipv4CidrBlock: 10.2.3.224/28
+        routeTable: Network-EgressTgwAttach-B
+        ipv4CidrBlock: {{ CentralEgressTgwAzBCidr }}
+      - name: Network-EgressTgwAttach-C
+        availabilityZone: c
+        routeTable: Network-EgressTgwAttach-C
+        ipv4CidrBlock: {{ CentralEgressTgwAzCCidr }}
 
-      - name: Network-Inspection-Pub-A
+      - name: Network-Egress-Pub-A
         availabilityZone: a
-        routeTable: Network-Inspection-Pub-A
-        ipv4CidrBlock: 10.2.3.176/28
-      - name: Network-Inspection-Pub-B
+        routeTable: Network-Egress-Pub-A
+        ipv4CidrBlock: {{ CentralEgressOutboundAzACidr }}
+      - name: Network-Egress-Pub-B
         availabilityZone: b
-        routeTable: Network-Inspection-Pub-B
-        ipv4CidrBlock: 10.2.3.192/28
+        routeTable: Network-Egress-Pub-B
+        ipv4CidrBlock: {{ CentralEgressOutboundAzBCidr }}
+      - name: Network-Egress-Pub-C
+        availabilityZone: c
+        routeTable: Network-Egress-Pub-C
+        ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
 
     transitGatewayAttachments:
       - name: Network-Inspection
@@ -350,8 +414,9 @@ vpcs:
           - Network-Main-Core
         routeTablePropagations: []
         subnets:
-          - Network-InspectionTgwAttach-A
-          - Network-InspectionTgwAttach-B
+          - Network-EgressTgwAttach-A
+          - Network-EgressTgwAttach-B
+          - Network-EgressTgwAttach-C
 
 
   - name: Portal-Development
@@ -449,7 +514,7 @@ vpcFlowLogs:
     s3:
       lifecycleRules: []
     cloudWatchLogs:
-      retentionInDays: 3653
+      retentionInDays: 365
   defaultFormat: false
   customFields:
     - version
