@@ -83,16 +83,26 @@ centralNetworkServices:
               # Block traffic between production VPCs
               - action: DROP
                 header:
-                  destination: 10.4.0.0/22
+                  destination: {{ PortalProductionCidr }}
                   destinationPort: ANY
                   direction: ANY
                   protocol: IP
-                  source: 10.5.0.0/22
+                  source: {{ PortalStagingCidr }}
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
                     settings: ["100"]
-
+              - action: DROP
+                header:
+                  destination: {{ PortalProductionCidr }}
+                  destinationPort: ANY
+                  direction: ANY
+                  protocol: IP
+                  source: {{ PortalDevelopmentCidr }}
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: sid
+                    settings: ["100"]
               - action: ALERT
                 header:
                   destination: 8.8.8.8/32
@@ -123,11 +133,9 @@ centralNetworkServices:
             ipSets:
               name: HOME_NET
               definition:
-                - 10.1.0.0/22
-                - 10.2.0.0/22
-                - 10.3.0.0/22
-                - 10.4.0.0/22
-                - 10.5.0.0/22
+                - {{ PortalProductionCidr }}
+                - {{ PortalStagingCidr }}
+                - {{ PortalDevelopmentCidr }}
             portSets:
               name: HOME_NET
               definition:
