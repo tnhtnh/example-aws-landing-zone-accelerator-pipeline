@@ -41,8 +41,6 @@ transitGateways:
         routes: []
       - name: Network-Main-Production
         routes: []
-      - name: Network-Main-Production
-        routes: []
 
 
 centralNetworkServices:
