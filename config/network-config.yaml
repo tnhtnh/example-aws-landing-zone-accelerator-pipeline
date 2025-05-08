@@ -531,6 +531,48 @@ vpcs:
       - name: "{{ AcceleratorPrefix }}-block-group"
         priority: 101
 
+    networkAcls:
+      - name: Portal-Development-Public-ACL
+        subnetAssociations:
+          - Portal-Development-Public-A
+          - Portal-Development-Public-B
+          - Portal-Development-Public-C
+        inboundRules:
+          - rule: 100
+            protocol: 6
+            fromPort: 80
+            toPort: 80
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 200
+            protocol: 6
+            fromPort: 443
+            toPort: 443
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 10000
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            source: 0.0.0.0/0
+        outboundRules:
+          - rule: 100
+            protocol: -1
+            fromPort: 1024
+            toPort: 65535
+            action: allow
+            destination: {{ PortalDevelopmentPrivateCidr }}
+          - rule: 32766
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            destination: 0.0.0.0/0
+        tags:
+          - key: Name
+            value: Portal-Development-Public-ACL
+
     routeTables:
       - name: Portal-Development-Private-A
         routes:
