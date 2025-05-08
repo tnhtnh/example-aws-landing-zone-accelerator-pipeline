@@ -6,9 +6,7 @@ homeRegion: &HOME_REGION {{ AcceleratorHomeRegion }}
 #####################################
 defaultVpc:
   delete: true
-  excludeAccounts:
-    - Network
-    - Portal
+  excludeAccounts: []
 
 #####################################
 # Transit Gateways-- use this object #
