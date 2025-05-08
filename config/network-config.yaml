@@ -6,6 +6,9 @@ homeRegion: &HOME_REGION {{ AcceleratorHomeRegion }}
 #####################################
 defaultVpc:
   delete: true
+  excludeAccounts:
+    - Network
+    - Portal
 
 #####################################
 # Transit Gateways-- use this object #
@@ -391,6 +394,23 @@ vpcs:
         availabilityZone: c
         routeTable: Network-Egress-Pub-C
         ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
+
+    transitGatewayAttachments:
+      - name: Network-Egress
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Core
+          - Network-Main-Development
+          - Network-Main-Staging
+          - Network-Main-Production
+        routeTablePropagations:
+          - Network-Main-Core
+        subnets:
+          - Network-EgressTgwAttach-A
+          - Network-EgressTgwAttach-B
+          - Network-EgressTgwAttach-C
 
 vpcFlowLogs:
   trafficType: ALL
