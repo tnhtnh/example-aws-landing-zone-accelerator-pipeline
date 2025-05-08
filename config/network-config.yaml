@@ -301,6 +301,11 @@ vpcs:
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-A
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: a
 
           - name: S3Gateway
             type: gatewayEndpoint
@@ -315,7 +320,11 @@ vpcs:
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-B
-
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: b
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -329,7 +338,11 @@ vpcs:
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-C
-
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: c
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
