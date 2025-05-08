@@ -256,6 +256,11 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: a
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: a
 
       - name: Network-EgressTgwAttach-B
         routes:
@@ -263,6 +268,11 @@ vpcs:
             destination: 0.0.0.0/0
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: b
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
             targetAvailabilityZone: b
 
       - name: Network-EgressTgwAttach-C
@@ -272,7 +282,11 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: c
-
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: c
       - name: Network-Inspection-Egress-A
         routes:
           - name: NatRoute
