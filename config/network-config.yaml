@@ -8,15 +8,10 @@ defaultVpc:
   delete: true
   excludeAccounts: []
 
-
 transitGateways: []
 vpcs: []
 
 
-#####################################
-# Transit Gateways-- use this object #
-# to deploy transit gateways         #
-#####################################
 endpointPolicies:
   - name: Default
     document: vpc-endpoint-policies/default.json
