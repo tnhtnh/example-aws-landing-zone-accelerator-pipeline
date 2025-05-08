@@ -45,9 +45,6 @@ globalReplacements:
   - key: PortalStagingCidr
     type: String
     value: 192.168.1.0/24
-  - key: PortalDevelopmentCidr
-    type: String
-    value: 192.168.2.0/24
   # - key: WorkloadInfrastructureCidr
   #  type: String
   #  value: 10.134.0.0/15
