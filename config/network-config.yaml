@@ -29,23 +29,11 @@ transitGateways:
       - name: Network-Main-Core
         routes: []
       - name: Network-Main-Development
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
       - name: Network-Main-Staging
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
       - name: Network-Main-Production
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
 
 centralNetworkServices:
   delegatedAdminAccount: Network
