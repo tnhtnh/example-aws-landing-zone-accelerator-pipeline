@@ -102,7 +102,7 @@ centralNetworkServices:
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
-                    settings: ["100"]
+                    settings: ["200"]
               - action: ALERT
                 header:
                   destination: 8.8.8.8/32
@@ -115,7 +115,7 @@ centralNetworkServices:
                   - keyword: msg
                     settings: ['"example message"']
                   - keyword: sid
-                    settings: ["102"]
+                    settings: ["300"]
 
       - name: domain-list-group
         regions:
