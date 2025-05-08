@@ -46,11 +46,6 @@ centralNetworkServices:
           - Network-Inspection-Egress-B
           - Network-Inspection-Egress-C
         vpc: Network-Egress
-        loggingConfiguration:
-          - destination: s3
-            type: ALERT
-          - destination: s3
-            type: FLOW
     policies:
       - name: "{{ AcceleratorPrefix }}-policy"
         regions:
