@@ -31,6 +31,8 @@ transitGateways:
     routeTables:
       - name: Network-Main-Core
         routes: []
+      - name: Network-Main-Datacenter
+        routes: []
       - name: Network-Main-Development
         routes:
           - destinationCidrBlock: 0.0.0.0/0
@@ -397,16 +399,18 @@ vpcs:
 
     transitGatewayAttachments:
       - name: Network-Egress
+        options:
+          applianceModeSupport: enable
         transitGateway:
           name: Network-Main
           account: Network
         routeTableAssociations:
           - Network-Main-Core
+        routeTablePropagations:
+          - Network-Main-Core
           - Network-Main-Development
           - Network-Main-Staging
           - Network-Main-Production
-        routeTablePropagations:
-          - Network-Main-Core
         subnets:
           - Network-EgressTgwAttach-A
           - Network-EgressTgwAttach-B
