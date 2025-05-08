@@ -441,6 +441,186 @@ vpcs:
           - Network-EgressTgwAttach-A
           - Network-EgressTgwAttach-B
           - Network-EgressTgwAttach-C
+  - name: Portal-Development
+    account: PortalDevelopment
+    region: *HOME_REGION
+    cidrs:
+      - {{ PortalDevelopmentCidr }}
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: false
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      subnets:
+        - Portal-Development-Private-A
+        - Portal-Development-Private-B
+        - Portal-Development-Private-C
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+        - service: cloudformation
+        - service: secretsmanager
+        - service: monitoring
+        # - service: access-analyzer
+        # - service: acm-pca
+        # - service: application-autoscaling
+        # - service: appmesh-envoy-management
+        # - service: athena
+        # - service: autoscaling
+        # - service: autoscaling-plans
+        # - service: awsconnector
+        # - service: cassandra
+        # - service: clouddirectory
+        # - service: cloudtrail
+        # - service: codebuild
+        # - service: codecommit
+        # - service: codepipeline
+        # - service: config
+        # - service: datasync
+        # - service: ebs
+        # - service: ecr.api
+        # - service: ecr.dkr
+        # - service: ecs
+        # - service: ecs-agent
+        # - service: ecs-telemetry
+        # - service: elasticbeanstalk
+        # - service: elasticbeanstalk-health
+        # - service: elasticfilesystem
+        # - service: elasticloadbalancing
+        # - service: elasticmapreduce
+        # - service: email-smtp
+        # - service: events
+        # - service: execute-api
+        # - service: git-codecommit
+        # - service: glue
+        # - service: kinesis-firehose
+        # - service: kinesis-streams
+        # - service: license-manager
+        # - service: macie2
+        # - service: notebook
+        # - service: sagemaker.api
+        # - service: sagemaker.runtime
+        # - service: servicecatalog
+        # - service: sms
+        # - service: sns
+        # - service: sqs
+        # - service: states
+        # - service: storagegateway
+        # - service: sts
+        # - service: synthetics
+        # - service: transfer
+        # - service: transfer.server
+        # - service: workspaces
+    queryLogs:
+      - "{{ AcceleratorPrefix }}-query-logs"
+
+    dnsFirewallRuleGroups:
+      - name: "{{ AcceleratorPrefix }}-block-group"
+        priority: 101
+
+    routeTables:
+      - name: Portal-Development-Private-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+      - name: Portal-Development-Private-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+      - name: Portal-Development-Private-C
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+      - name: Portal-Development-Public-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: Portal-Development-Public-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: Portal-Development-Public-C
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+
+    subnets:
+      - name: Portal-Development-Private-A
+        availabilityZone: a
+        routeTable: Portal-Development-Private-A
+        ipv4CidrBlock: {{ PortalDevelopmentPrivateAzACidr }}
+      - name: Portal-Development-Private-B
+        availabilityZone: b
+        routeTable: Portal-Development-Private-B
+        ipv4CidrBlock: {{ PortalDevelopmentPrivateAzBCidr }}
+      - name: Portal-Development-Private-C
+        availabilityZone: c
+        routeTable: Portal-Development-Private-C
+        ipv4CidrBlock: {{ PortalDevelopmentPrivateAzCCidr }}
+      - name: Portal-Development-Public-A
+        availabilityZone: a
+        routeTable: Portal-Development-Public-A
+        ipv4CidrBlock: {{ PortalDevelopmentPublicAzACidr }}
+      - name: Portal-Development-Public-B
+        availabilityZone: b
+        routeTable: Portal-Development-Public-B
+        ipv4CidrBlock: {{ PortalDevelopmentPublicAzBCidr }}
+      - name: Portal-Development-Public-C
+        availabilityZone: c
+        routeTable: Portal-Development-Public-C
+        ipv4CidrBlock: {{ PortalDevelopmentPublicAzCCidr }}
+
+    transitGatewayAttachments:
+      - name: Portal-Development
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Development
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Development
+        subnets:
+          - Portal-Development-Private-A
+          - Portal-Development-Private-B
+          - Portal-Development-Private-C
+          - Portal-Development-Public-A
+          - Portal-Development-Public-B
+          - Portal-Development-Public-C
 
 vpcFlowLogs:
   trafficType: ALL
