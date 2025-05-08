@@ -618,9 +618,6 @@ vpcs:
           - Portal-Development-Private-A
           - Portal-Development-Private-B
           - Portal-Development-Private-C
-          - Portal-Development-Public-A
-          - Portal-Development-Public-B
-          - Portal-Development-Public-C
 
 vpcFlowLogs:
   trafficType: ALL
