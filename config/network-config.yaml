@@ -562,7 +562,7 @@ vpcs:
             fromPort: 1024
             toPort: 65535
             action: allow
-            destination: {{ PortalDevelopmentPrivateCidr }}
+            destination: 0.0.0.0/0
           - rule: 32766
             protocol: -1
             fromPort: 0
