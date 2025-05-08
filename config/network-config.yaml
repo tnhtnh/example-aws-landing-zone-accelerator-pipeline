@@ -46,6 +46,10 @@ centralNetworkServices:
           - Network-Inspection-Egress-B
           - Network-Inspection-Egress-C
         vpc: Network-Egress
+        loggingConfiguration:
+          - destination: cloud-watch-logs
+            type: ALERT
+
     policies:
       - name: "{{ AcceleratorPrefix }}-policy"
         regions:
