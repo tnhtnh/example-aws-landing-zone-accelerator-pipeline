@@ -28,11 +28,7 @@ transitGateways:
     autoAcceptSharingAttachments: enable
     routeTables:
       - name: Network-Main-Core
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
       - name: Network-Main-Datacenter
         routes: []
       - name: Network-Main-Development
@@ -42,9 +38,17 @@ transitGateways:
               vpcName: Network-Egress
               account: Network
       - name: Network-Main-Staging
-        routes: []
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
+              account: Network
       - name: Network-Main-Production
-        routes: []
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
+              account: Network
 
 
 centralNetworkServices:
@@ -847,6 +851,7 @@ vpcs:
             destination: 0.0.0.0/0
             type: transitGateway
             target: Network-Main
+
       - name: Portal-Staging-Public-B
         routes:
           - name: TgwRoute
