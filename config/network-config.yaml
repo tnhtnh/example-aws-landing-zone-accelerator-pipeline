@@ -36,7 +36,11 @@ transitGateways:
       - name: Network-Main-Datacenter
         routes: []
       - name: Network-Main-Development
-        routes: []
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
+              account: Network
       - name: Network-Main-Staging
         routes: []
       - name: Network-Main-Production
