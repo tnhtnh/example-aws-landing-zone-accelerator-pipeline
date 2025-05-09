@@ -843,10 +843,6 @@ vpcs:
             destination: 0.0.0.0/0
             type: transitGateway
             target: Network-Main
-          - name: IGW
-            destination: 0.0.0.0/0
-            type: internetGateway
-            target: IGW
       - name: Portal-Staging-Public-B
         routes:
           - name: TgwRoute
