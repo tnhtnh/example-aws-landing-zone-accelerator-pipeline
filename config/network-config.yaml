@@ -906,7 +906,7 @@ vpcs:
     region: *HOME_REGION
     cidrs:
       - {{ PortalProductionCidr }}
-    internetGateway: true  
+    internetGateway: true
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
