@@ -446,6 +446,7 @@ vpcs:
     region: *HOME_REGION
     cidrs:
       - {{ PortalDevelopmentCidr }}
+    internetGateway: false
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
@@ -674,6 +675,7 @@ vpcs:
     region: *HOME_REGION
     cidrs:
       - {{ PortalStagingCidr }}
+    internetGateway: false
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
@@ -904,6 +906,7 @@ vpcs:
     region: *HOME_REGION
     cidrs:
       - {{ PortalProductionCidr }}
+    internetGateway: true  
     enableDnsHostnames: true
     enableDnsSupport: true
     instanceTenancy: default
