@@ -583,6 +583,9 @@ vpcs:
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
       - name: Portal-Development-Private-B
         routes:
           - name: TgwRoute
@@ -592,6 +595,9 @@ vpcs:
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
       - name: Portal-Development-Private-C
         routes:
           - name: TgwRoute
@@ -601,6 +607,9 @@ vpcs:
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
       - name: Portal-Development-Public-A
         routes:
           - name: TgwRoute
@@ -660,7 +669,464 @@ vpcs:
           - Portal-Development-Private-A
           - Portal-Development-Private-B
           - Portal-Development-Private-C
+  - name: Portal-Staging
+    account: PortalStaging
+    region: *HOME_REGION
+    cidrs:
+      - {{ PortalStagingCidr }}
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: false
 
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      subnets:
+        - Portal-Staging-Private-A
+        - Portal-Staging-Private-B
+        - Portal-Staging-Private-C
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+        - service: cloudformation
+        - service: secretsmanager
+        - service: monitoring
+        # - service: access-analyzer
+        # - service: acm-pca
+        # - service: application-autoscaling
+        # - service: appmesh-envoy-management
+        # - service: athena
+        # - service: autoscaling
+        # - service: autoscaling-plans
+        # - service: awsconnector
+        # - service: cassandra
+        # - service: clouddirectory
+        # - service: cloudtrail
+        # - service: codebuild
+        # - service: codecommit
+        # - service: codepipeline
+        # - service: config
+        # - service: datasync
+        # - service: ebs
+        # - service: ecr.api
+        # - service: ecr.dkr
+        # - service: ecs
+        # - service: ecs-agent
+        # - service: ecs-telemetry
+        # - service: elasticbeanstalk
+        # - service: elasticbeanstalk-health
+        # - service: elasticfilesystem
+        # - service: elasticloadbalancing
+        # - service: elasticmapreduce
+        # - service: email-smtp
+        # - service: events
+        # - service: execute-api
+        # - service: git-codecommit
+        # - service: glue
+        # - service: kinesis-firehose
+        # - service: kinesis-streams
+        # - service: license-manager
+        # - service: macie2
+        # - service: notebook
+        # - service: sagemaker.api
+        # - service: sagemaker.runtime
+        # - service: servicecatalog
+        # - service: sms
+        # - service: sns
+        # - service: sqs
+        # - service: states
+        # - service: storagegateway
+        # - service: sts
+        # - service: synthetics
+        # - service: transfer
+        # - service: transfer.server
+        # - service: workspaces
+    queryLogs:
+      - "{{ AcceleratorPrefix }}-query-logs"
+
+    dnsFirewallRuleGroups:
+      - name: "{{ AcceleratorPrefix }}-block-group"
+        priority: 101
+
+    networkAcls:
+      - name: Portal-Staging-Public-ACL
+        subnetAssociations:
+          - Portal-Staging-Public-A
+          - Portal-Staging-Public-B
+          - Portal-Staging-Public-C
+        inboundRules:
+          - rule: 100
+            protocol: 6
+            fromPort: 80
+            toPort: 80
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 200
+            protocol: 6
+            fromPort: 443
+            toPort: 443
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 10000
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            source: 0.0.0.0/0
+        outboundRules:
+          - rule: 100
+            protocol: -1
+            fromPort: 1024
+            toPort: 65535
+            action: allow
+            destination: 0.0.0.0/0
+          - rule: 32766
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            destination: 0.0.0.0/0
+        tags:
+          - key: Name
+            value: Portal-Staging-Public-ACL
+
+    routeTables:
+      - name: Portal-Staging-Private-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+      - name: Portal-Staging-Private-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Portal-Staging-Private-C
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Portal-Staging-Public-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Portal-Staging-Public-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: Portal-Staging-Public-C
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+
+    subnets:
+      - name: Portal-Staging-Private-A
+        availabilityZone: a
+        routeTable: Portal-Staging-Private-A
+        ipv4CidrBlock: {{ PortalStagingPrivateAzACidr }}
+      - name: Portal-Staging-Private-B
+        availabilityZone: b
+        routeTable: Portal-Staging-Private-B
+        ipv4CidrBlock: {{ PortalStagingPrivateAzBCidr }}
+      - name: Portal-Staging-Private-C
+        availabilityZone: c
+        routeTable: Portal-Staging-Private-C
+        ipv4CidrBlock: {{ PortalStagingPrivateAzCCidr }}
+      - name: Portal-Staging-Public-A
+        availabilityZone: a
+        routeTable: Portal-Staging-Public-A
+        ipv4CidrBlock: {{ PortalStagingPublicAzACidr }}
+      - name: Portal-Staging-Public-B
+        availabilityZone: b
+        routeTable: Portal-Staging-Public-B
+        ipv4CidrBlock: {{ PortalStagingPublicAzBCidr }}
+      - name: Portal-Staging-Public-C
+        availabilityZone: c
+        routeTable: Portal-Staging-Public-C
+        ipv4CidrBlock: {{ PortalStagingPublicAzCCidr }}
+
+    transitGatewayAttachments:
+      - name: Portal-Staging
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Staging
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Staging
+        subnets:
+          - Portal-Staging-Private-A
+          - Portal-Staging-Private-B
+          - Portal-Staging-Private-C
+
+  - name: Portal-Production
+    account: PortalProduction
+    region: *HOME_REGION
+    cidrs:
+      - {{ PortalProductionCidr }}
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: false
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      subnets:
+        - Portal-Production-Private-A
+        - Portal-Production-Private-B
+        - Portal-Production-Private-C
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+        - service: cloudformation
+        - service: secretsmanager
+        - service: monitoring
+        # - service: access-analyzer
+        # - service: acm-pca
+        # - service: application-autoscaling
+        # - service: appmesh-envoy-management
+        # - service: athena
+        # - service: autoscaling
+        # - service: autoscaling-plans
+        # - service: awsconnector
+        # - service: cassandra
+        # - service: clouddirectory
+        # - service: cloudtrail
+        # - service: codebuild
+        # - service: codecommit
+        # - service: codepipeline
+        # - service: config
+        # - service: datasync
+        # - service: ebs
+        # - service: ecr.api
+        # - service: ecr.dkr
+        # - service: ecs
+        # - service: ecs-agent
+        # - service: ecs-telemetry
+        # - service: elasticbeanstalk
+        # - service: elasticbeanstalk-health
+        # - service: elasticfilesystem
+        # - service: elasticloadbalancing
+        # - service: elasticmapreduce
+        # - service: email-smtp
+        # - service: events
+        # - service: execute-api
+        # - service: git-codecommit
+        # - service: glue
+        # - service: kinesis-firehose
+        # - service: kinesis-streams
+        # - service: license-manager
+        # - service: macie2
+        # - service: notebook
+        # - service: sagemaker.api
+        # - service: sagemaker.runtime
+        # - service: servicecatalog
+        # - service: sms
+        # - service: sns
+        # - service: sqs
+        # - service: states
+        # - service: storagegateway
+        # - service: sts
+        # - service: synthetics
+        # - service: transfer
+        # - service: transfer.server
+        # - service: workspaces
+    queryLogs:
+      - "{{ AcceleratorPrefix }}-query-logs"
+
+    dnsFirewallRuleGroups:
+      - name: "{{ AcceleratorPrefix }}-block-group"
+        priority: 101
+
+    networkAcls:
+      - name: Portal-Production-Public-ACL
+        subnetAssociations:
+          - Portal-Production-Public-A
+          - Portal-Production-Public-B
+          - Portal-Production-Public-C
+        inboundRules:
+          - rule: 100
+            protocol: 6
+            fromPort: 80
+            toPort: 80
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 200
+            protocol: 6
+            fromPort: 443
+            toPort: 443
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 10000
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            source: 0.0.0.0/0
+        outboundRules:
+          - rule: 100
+            protocol: -1
+            fromPort: 1024
+            toPort: 65535
+            action: allow
+            destination: 0.0.0.0/0
+          - rule: 32766
+            protocol: -1
+            fromPort: 0
+            toPort: 65535
+            action: deny
+            destination: 0.0.0.0/0
+        tags:
+          - key: Name
+            value: Portal-Production-Public-ACL
+
+    routeTables:
+      - name: Portal-Production-Private-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Portal-Production-Private-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Portal-Production-Private-C
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: Portal-Production-Public-A
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Portal-Production-Public-B
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Portal-Production-Public-C
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+
+    subnets:
+      - name: Portal-Production-Private-A
+        availabilityZone: a
+        routeTable: Portal-Production-Private-A
+        ipv4CidrBlock: {{ PortalProductionPrivateAzACidr }}
+      - name: Portal-Production-Private-B
+        availabilityZone: b
+        routeTable: Portal-Production-Private-B
+        ipv4CidrBlock: {{ PortalProductionPrivateAzBCidr }}
+      - name: Portal-Production-Private-C
+        availabilityZone: c
+        routeTable: Portal-Production-Private-C
+        ipv4CidrBlock: {{ PortalProductionPrivateAzCCidr }}
+      - name: Portal-Production-Public-A
+        availabilityZone: a
+        routeTable: Portal-Production-Public-A
+        ipv4CidrBlock: {{ PortalProductionPublicAzACidr }}
+      - name: Portal-Production-Public-B
+        availabilityZone: b
+        routeTable: Portal-Production-Public-B
+        ipv4CidrBlock: {{ PortalProductionPublicAzBCidr }}
+      - name: Portal-Production-Public-C
+        availabilityZone: c
+        routeTable: Portal-Production-Public-C
+        ipv4CidrBlock: {{ PortalProductionPublicAzCCidr }}
+
+    transitGatewayAttachments:
+      - name: Portal-Production
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Production
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Production
+        subnets:
+          - Portal-Production-Private-A
+          - Portal-Production-Private-B
+          - Portal-Production-Private-C
 vpcFlowLogs:
   trafficType: ALL
   maxAggregationInterval: 600

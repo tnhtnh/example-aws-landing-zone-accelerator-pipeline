@@ -90,9 +90,13 @@ globalReplacements:
   - key: OnPremisesPrefixList
     type: String
     value: 10.0.0.0/9
+# Portal Development
   - key: PortalDevelopmentCidr
     type: String
     value: 10.132.0.0/18
+#  - key: PortalDevelopmentPublicCidr
+#    type: String
+#    value: 10.132.0.0/24  
   - key: PortalDevelopmentPublicAzACidr
     type: String
     value: 10.132.0.0/26
@@ -102,6 +106,7 @@ globalReplacements:
   - key: PortalDevelopmentPublicAzCCidr
     type: String
     value: 10.132.0.128/26
+#   Unallocated  from 10.132.1.0/24 -> 10.132.31.0/24
 #  - key: PortalDevelopmentPrivateCidr
 #    type: String
 #    value: 10.132.32.0/19
@@ -114,3 +119,53 @@ globalReplacements:
   - key: PortalDevelopmentPrivateAzCCidr
     type: String
     value: 10.132.48.0/21
+# Portal Staging
+  - key: PortalStagingCidr
+    type: String
+    value: 10.132.64.0/18
+  - key: PortalStagingPublicAzACidr
+    type: String
+    value: 10.132.64.0/26
+  - key: PortalStagingPublicAzBCidr
+    type: String
+    value: 10.132.64.64/26
+  - key: PortalStagingPublicAzCCidr
+    type: String
+    value: 10.132.64.128/26
+#  - key: PortalDevelopmentPrivateCidr
+#    type: String
+#    value: 10.132.96.0/19
+  - key: PortalStagingPrivateAzACidr
+    type: String
+    value: 10.132.96.0/21
+  - key: PortalStagingPrivateAzBCidr
+    type: String
+    value: 10.132.104.0/21
+  - key: PortalStagingPrivateAzCCidr
+    type: String
+    value: 10.132.112.0/21
+# Portal Production
+  - key: PortalProductionCidr
+    type: String
+    value: 10.132.128.0/18
+  - key: PortalProductionPublicAzACidr
+    type: String
+    value: 10.132.128.0/26
+  - key: PortalProductionPublicAzBCidr
+    type: String
+    value: 10.132.128.64/26
+  - key: PortalProductionPublicAzCCidr
+    type: String
+    value: 10.132.128.128/26
+#  - key: PortalProductionPrivateCidr
+#    type: String
+#    value: 10.132.160.0/19
+  - key: PortalProductionPrivateAzACidr
+    type: String
+    value: 10.132.160.0/21
+  - key: PortalProductionPrivateAzBCidr
+    type: String
+    value: 10.132.168.0/21
+  - key: PortalProductionPrivateAzCCidr
+    type: String
+    value: 10.132.176.0/21
