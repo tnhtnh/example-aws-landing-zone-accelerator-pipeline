@@ -821,6 +821,9 @@ vpcs:
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
       - name: Portal-Staging-Private-B
         routes:
           - name: TgwRoute
@@ -1204,7 +1207,7 @@ vpcTemplates:
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: CustomerVPC-Private-RouteTable-C
+      - name: CustomerVPC-Public-RouteTable-C
         routes:
           - name: IGW
             destination: 0.0.0.0/0
@@ -1261,9 +1264,9 @@ vpcTemplates:
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-C
+      - name: CustomerVPC-Public-Subnet-C
         availabilityZone: c
-        routeTable: CustomerVPC-Private-RouteTable-C
+        routeTable: CustomerVPC-Public-RouteTable-C
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
