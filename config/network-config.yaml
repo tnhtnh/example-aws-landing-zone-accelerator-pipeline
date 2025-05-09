@@ -1135,6 +1135,7 @@ vpcs:
           - Portal-Production-Private-A
           - Portal-Production-Private-B
           - Portal-Production-Private-C
+
 vpcFlowLogs:
   trafficType: ALL
   maxAggregationInterval: 600
@@ -1174,6 +1175,146 @@ vpcFlowLogs:
     - pkt-dst-aws-service
     - flow-direction
     - traffic-path
+
+
+vpcTemplates:
+  - name: CustomerVPC
+    region: {{ AcceleratorHomeRegion }}
+    deploymentTargets:
+      organizationalUnits:
+        - Customer/Accounts
+    useCentralEndpoints: false
+    ipamAllocations:
+      - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+        netmaskLength: 24
+    internetGateway: true
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    routeTables:
+      - name: CustomerVPC-Public-RouteTable-A
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: CustomerVPC-Public-RouteTable-B
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: CustomerVPC-Private-RouteTable-C
+        routes:
+          - name: IGW
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+
+      - name: CustomerVPC-Private-RouteTable-A
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-CustomerVPC-Public-A
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: CustomerVPC-Private-RouteTable-B
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-CustomerVPC-Public-B
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+      - name: CustomerVPC-Private-RouteTable-C
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-CustomerVPC-Public-C
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+    subnets:
+      - name: CustomerVPC-Public-Subnet-A
+        availabilityZone: a
+        routeTable: CustomerVPC-Public-RouteTable-A
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+      - name: CustomerVPC-Public-Subnet-B
+        availabilityZone: b
+        routeTable: CustomerVPC-Public-RouteTable-B
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+      - name: CustomerVPC-Private-Subnet-C
+        availabilityZone: c
+        routeTable: CustomerVPC-Private-RouteTable-C
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+      - name: CustomerVPC-Private-Subnet-A
+        availabilityZone: a
+        routeTable: CustomerVPC-Private-RouteTable-A
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+      - name: CustomerVPC-Private-Subnet-B
+        availabilityZone: b
+        routeTable: CustomerVPC-Private-RouteTable-B
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+      - name: CustomerVPC-Private-Subnet-C
+        availabilityZone: c
+        routeTable: CustomerVPC-Private-RouteTable-C
+        ipamAllocation:
+          ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
+          netmaskLength: 27
+
+    natGateways:
+      - name: Nat-CustomerVPC-Public-A
+        subnet: CustomerVPC-Public-Subnet-A
+      - name: Nat-CustomerVPC-Public-B
+        subnet: CustomerVPC-Public-Subnet-B
+      - name: Nat-CustomerVPC-Public-C
+        subnet: CustomerVPC-Public-Subnet-C
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      subnets:
+        - CustomerVPC-Private-Subnet-A
+        - CustomerVPC-Private-Subnet-B
+        - CustomerVPC-Private-Subnet-C
+      endpoints:
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+        - service: cloudformation
+        - service: secretsmanager
+        - service: monitoring
 
 prefixLists:
   - addressFamily: IPv4
