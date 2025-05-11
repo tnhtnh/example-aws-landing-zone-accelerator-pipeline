@@ -4,7 +4,9 @@ customizations:
         - CAPABILITY_IAM
       deploymentTargets:
         organizationalUnits:
-          - Portal
+          - Portal/Development
+          - Portal/Staging
+          - Portal/Production
       regions:
         - ap-southeast-2
       template: customizations/github-oicd-provider.yaml
