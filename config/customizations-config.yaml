@@ -1,10 +1,7 @@
 customizations:
   cloudFormationStackSets:
     - capabilities:
-        - CAPABILITY_NAMED_IAM
-        - CAPABILITY_AUTO_EXPAND
         - CAPABILITY_IAM
-        - CAPABILITY_AUTO_EXPAND
       deploymentTargets:
         organizationalUnits:
           - Portal
