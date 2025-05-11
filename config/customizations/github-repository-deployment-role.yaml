@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation template to create a named GitHub OIDC deployment role for CI/CD.
+  The role is intended for deployment access from a specific GitHub org/repo/claim (env/branch).
+  The OIDC provider ARN is referenced from SSM Parameter Store.
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Description: "GitHub organization name (e.g., my-org)"
+  GitHubRepo:
+    Type: String
+    Description: "GitHub repository name (e.g., my-repo)"
+  GitHubClaim:
+    Type: String
+    Description: "GitHub claim (e.g., ref:refs/heads/main or enviroment:prod)"
+
+Resources:
+  CICDDeploymentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: "github-oidc-${GitHubOrg}-${GitHubRepo}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: '{{resolve:ssm:/account/cicd/github-oidc-provider}}'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  Fn::Sub: "repo:${GitHubOrg}/${GitHubRepo}:${GitHubClaim}"
+      # TODO: Restrict permissions to least privilege for your deployment needs
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess  # Replace with least privilege policy in production
+      Description:
+        Fn::Sub: "Deployment role for GitHub Actions OIDC for ${GitHubOrg}/${GitHubRepo} (${GitHubClaim})"
+
+Outputs:
+  CICDDeploymentRoleArn:
+    Description: "ARN of the created GitHub OIDC deployment role."
+    Value:
+      Fn::GetAtt:
+        - CICDDeploymentRole
+        - Arn
