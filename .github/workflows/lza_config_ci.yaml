@@ -50,6 +50,13 @@ jobs:
           yamllint config/
           echo "Linting successful."
 
+      - name: Install cfn-lint
+        run: pip install cfn-lint
+
+      - name: Lint CloudFormation templates (cfn-lint)
+        run: |
+          cfn-lint config/customizations/*.yaml
+
       - name: Validate Replacement Keys
         run: |
           pip install pyyaml
