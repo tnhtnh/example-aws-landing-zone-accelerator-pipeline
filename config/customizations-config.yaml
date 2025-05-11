@@ -12,3 +12,23 @@ customizations:
         - ap-southeast-2
       template: customizations/github-oicd-provider.yaml
       name: GitHubOICDProvider
+
+  cloudFormationStacks:
+    - template: customizations/github-repository-deployment-role.yaml
+      name: github-tnhtnh-container-pipeline-sydney-summit-2025
+      deploymentTargets:
+        organizationalUnits:
+          - Portal/Development
+          - Portal/Staging
+          - Portal/Production
+      regions:
+        - ap-southeast-2
+      runOrder: 1
+      terminationProtection: true
+      parameters:
+        - name: GitHubOrg
+          value: "tnhtnh"
+        - name: GitHubRepo
+          value: "container-pipeline-sydney-summit-2025"
+        - name: GitHubClaim
+          value: "ref:refs/heads/main"
