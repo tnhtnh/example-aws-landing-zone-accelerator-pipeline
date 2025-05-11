@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation StackSet template to create the standard GitHub OIDC Identity Provider for AWS IAM.
+  Suitable for multi-account, multi-region deployment via StackSets.
+
+Resources:
+  GitHubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: "https://token.actions.githubusercontent.com"
+      ClientIdList:
+        - "sts.amazonaws.com"
+      ThumbprintList:
+        - "6938fd4d98bab03faadb97b34396831e3780aea1"
+        - "1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+
+  GitHubOIDCProviderArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/account/cicd/github-oidc-provider"
+      Type: String
+      Value:
+        Fn::GetAtt:
+          - GitHubOIDCProvider
+          - Arn
+      Description: "ARN of the GitHub OIDC Provider for use by CI/CD pipelines."
+      Tier: Standard
+
+Outputs:
+  GitHubOIDCProviderArn:
+    Description: "ARN of the created GitHub OIDC Provider."
+    Value:
+      Fn::GetAtt:
+        - GitHubOIDCProvider
+        - Arn
+  GitHubOIDCProviderArnParameter:
+    Description: "SSM Parameter storing the GitHub OIDC Provider ARN."
+    Value: "/account/cicd/github-oidc-provider"
