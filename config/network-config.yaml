@@ -943,6 +943,16 @@ vpcs:
         - service: cloudformation
         - service: secretsmanager
         - service: monitoring
+        - service: route53
+        - service: route53resolver
+        - service: ecs
+        - service: ecs-agent
+        - service: ecs-telemetry
+        - service: ecr.api
+        - service: ecr.dkr
+        - service: sts
+        - service: sns
+        - service: sqs
         # - service: access-analyzer
         # - service: acm-pca
         # - service: application-autoscaling
@@ -960,7 +970,7 @@ vpcs:
         # - service: config
         # - service: datasync
         # - service: ebs
-        # - service: ecr.api
+        #  - service: ecr.api
         # - service: ecr.dkr
         # - service: ecs
         # - service: ecs-agent
