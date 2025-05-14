@@ -10,6 +10,8 @@ organizationalUnits:
   - name: Customer/Networking
   - name: Customer/Accounts
   - name: Sandbox
+  - name: Suspended
+    ignore: true
 quarantineNewAccounts:
   enable: true
   scpPolicyName: "{{ AcceleratorPrefix }}-Quarantine-New-Object"
