@@ -39,7 +39,7 @@ transitGateways:
         routes: []
 
 centralNetworkServices:
-  delegatedAdminAccount: Network
+  delegatedAdminAccount: Network  
   networkFirewall:
     firewalls:
       - name: "{{ AcceleratorPrefix }}-firewall"
@@ -820,8 +820,6 @@ vpcs:
         - service: cloudformation
         - service: secretsmanager
         - service: monitoring
-        - service: route53
-        - service: route53resolver
         - service: ecs
         - service: ecs-agent
         - service: ecs-telemetry
