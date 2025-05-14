@@ -12,10 +12,133 @@ defaultVpc:
 # Transit Gateways-- use this object #
 # to deploy transit gateways         #
 #####################################
+transitGateways:
+  - name: Network-Main
+    account: Network
+    region: *HOME_REGION
+    shareTargets:
+      organizationalUnits:
+        - Infrastructure
+        - Portal
+    asn: 65521
+    dnsSupport: enable
+    vpnEcmpSupport: enable
+    defaultRouteTableAssociation: disable
+    defaultRouteTablePropagation: disable
+    autoAcceptSharingAttachments: enable
+    routeTables:
+      - name: Network-Main-Core
+        routes: []
+      - name: Network-Main-Datacenter
+        routes: []
+      - name: Network-Main-Development
+        routes: []
+      - name: Network-Main-Production
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              vpcName: Network-Egress
+              account: Network
 
 
 centralNetworkServices:
   delegatedAdminAccount: Network
+  networkFirewall:
+    firewalls:
+      - name: "{{ AcceleratorPrefix }}-firewall"
+        firewallPolicy: "{{ AcceleratorPrefix }}-policy"
+        subnets:
+          - Network-Inspection-Egress-A
+          - Network-Inspection-Egress-B
+          - Network-Inspection-Egress-C
+        vpc: Network-Egress
+        loggingConfiguration:
+          - destination: cloud-watch-logs
+            type: ALERT
+
+    policies:
+      - name: "{{ AcceleratorPrefix }}-policy"
+        regions:
+          - *HOME_REGION
+        firewallPolicy:
+          statelessDefaultActions: ["aws:forward_to_sfe"]
+          statelessFragmentDefaultActions: ["aws:forward_to_sfe"]
+          statefulRuleGroups:
+            - name: "{{ AcceleratorPrefix }}-rule-group"
+            - name: "domain-list-group"
+        shareTargets:
+          organizationalUnits:
+            - Infrastructure
+    rules:
+      - name: "{{ AcceleratorPrefix }}-rule-group"
+        regions:
+          - *HOME_REGION
+        capacity: 100
+        type: STATEFUL
+        ruleGroup:
+          rulesSource:
+            statefulRules:
+              # Block traffic between production VPCs
+              - action: DROP
+                header:
+                  destination: {{ PortalProductionCidr }}
+                  destinationPort: ANY
+                  direction: ANY
+                  protocol: IP
+                  source: {{ PortalStagingCidr }}
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: sid
+                    settings: ["100"]
+              - action: DROP
+                header:
+                  destination: {{ PortalProductionCidr }}
+                  destinationPort: ANY
+                  direction: ANY
+                  protocol: IP
+                  source: {{ PortalDevelopmentCidr }}
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: sid
+                    settings: ["200"]
+              - action: ALERT
+                header:
+                  destination: 8.8.8.8/32
+                  destinationPort: ANY
+                  direction: FORWARD
+                  protocol: TCP
+                  source: ANY
+                  sourcePort: ANY
+                ruleOptions:
+                  - keyword: msg
+                    settings: ['"example message"']
+                  - keyword: sid
+                    settings: ["300"]
+
+      - name: domain-list-group
+        regions:
+          - *HOME_REGION
+        capacity: 10
+        type: STATEFUL
+        ruleGroup:
+          rulesSource:
+            rulesSourceList:
+              generatedRulesType: DENYLIST
+              # Add/Modify the domain list per business needs.
+              targets: [".google.com"]
+              targetTypes: ["TLS_SNI", "HTTP_HOST"]
+          ruleVariables:
+            ipSets:
+              name: HOME_NET
+              definition:
+                - {{ PortalProductionCidr }}
+                - {{ PortalStagingCidr }}
+                - {{ PortalDevelopmentCidr }}
+            portSets:
+              name: HOME_NET
+              definition:
+                - "80"
+                - "443"
   ipams:
     - name: "{{ AcceleratorPrefix }}-ipam"
       region: *HOME_REGION
@@ -53,6 +176,7 @@ centralNetworkServices:
             organizationalUnits:
               - Customer/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
+
   route53Resolver:
     endpoints: []
     queryLogs:
@@ -102,6 +226,220 @@ endpointPolicies:
     document: vpc-endpoint-policies/ec2.json
 
 vpcs:
+  - name: Network-Egress
+    account: Network
+    region: *HOME_REGION
+    cidrs:
+      - {{ CentralEgressCidr }}
+    internetGateway: true
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    useCentralEndpoints: false
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+        - service: dynamodb
+
+    queryLogs:
+      - "{{ AcceleratorPrefix }}-query-logs"
+
+    natGateways:
+      - name: Nat-Network-Egress-A
+        subnet: Network-Egress-Pub-A
+      - name: Nat-Network-Egress-B
+        subnet: Network-Egress-Pub-B
+      - name: Nat-Network-Egress-C
+        subnet: Network-Egress-Pub-C
+
+    routeTables:
+      - name: Network-EgressTgwAttach-A
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: a
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: a
+
+      - name: Network-EgressTgwAttach-B
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: b
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: b
+
+      - name: Network-EgressTgwAttach-C
+        routes:
+          - name: NfwRoute
+            destination: 0.0.0.0/0
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: c
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: c
+      - name: Network-Inspection-Egress-A
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Egress-A
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: a
+
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+      - name: Network-Inspection-Egress-B
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Egress-B
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: b
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+      - name: Network-Inspection-Egress-C
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Nat-Network-Egress-C
+          - name: TgwRoute
+            destination: {{ AwsCidr }}
+            type: transitGateway
+            target: Network-Main
+            targetAvailabilityZone: c
+          - name: S3Gateway
+            type: gatewayEndpoint
+            target: s3
+          - name: DynamoDBGateway
+            type: gatewayEndpoint
+            target: dynamodb
+
+      - name: Network-Egress-Pub-A
+        routes:
+          - name: NfwRoute
+            destination: {{ AwsCidr }}
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: a
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Network-Egress-Pub-B
+        routes:
+          - name: NfwRoute
+            destination: {{ AwsCidr }}
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: b
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Network-Egress-Pub-C
+        routes:
+          - name: NfwRoute
+            destination: {{ AwsCidr }}
+            type: networkFirewall
+            target: "{{ AcceleratorPrefix }}-firewall"
+            targetAvailabilityZone: c
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+    subnets:
+      - name: Network-Inspection-Egress-A
+        availabilityZone: a
+        routeTable: Network-Inspection-Egress-A
+        ipv4CidrBlock: {{ CentralEgressNFAzACidr }}
+      - name: Network-Inspection-Egress-B
+        availabilityZone: b
+        routeTable: Network-Inspection-Egress-B
+        ipv4CidrBlock: {{ CentralEgressNFAzBCidr }}
+      - name: Network-Inspection-Egress-C
+        availabilityZone: c
+        routeTable: Network-Inspection-Egress-C
+        ipv4CidrBlock: {{ CentralEgressNFAzCCidr }}
+
+      - name: Network-EgressTgwAttach-A
+        availabilityZone: a
+        routeTable: Network-EgressTgwAttach-A
+        ipv4CidrBlock: {{ CentralEgressTgwAzACidr }}
+      - name: Network-EgressTgwAttach-B
+        availabilityZone: b
+        routeTable: Network-EgressTgwAttach-B
+        ipv4CidrBlock: {{ CentralEgressTgwAzBCidr }}
+      - name: Network-EgressTgwAttach-C
+        availabilityZone: c
+        routeTable: Network-EgressTgwAttach-C
+        ipv4CidrBlock: {{ CentralEgressTgwAzCCidr }}
+
+      - name: Network-Egress-Pub-A
+        availabilityZone: a
+        routeTable: Network-Egress-Pub-A
+        ipv4CidrBlock: {{ CentralEgressOutboundAzACidr }}
+      - name: Network-Egress-Pub-B
+        availabilityZone: b
+        routeTable: Network-Egress-Pub-B
+        ipv4CidrBlock: {{ CentralEgressOutboundAzBCidr }}
+      - name: Network-Egress-Pub-C
+        availabilityZone: c
+        routeTable: Network-Egress-Pub-C
+        ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
+
+    transitGatewayAttachments:
+      - name: Network-Egress
+        options:
+          applianceModeSupport: enable
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Core
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Development
+          - Network-Main-Staging
+          - Network-Main-Production
+        subnets:
+          - Network-EgressTgwAttach-A
+          - Network-EgressTgwAttach-B
+          - Network-EgressTgwAttach-C
+ 
   - name: Portal-Production
     account: PortalProduction
     region: *HOME_REGION
@@ -112,14 +450,6 @@ vpcs:
     enableDnsSupport: true
     instanceTenancy: default
     useCentralEndpoints: false
-
-    natGateways:
-      - name: Nat-Network-Egress-A
-        subnet: Portal-Production-Private-A
-      - name: Nat-Network-Egress-B
-        subnet: Portal-Production-Private-B
-      - name: Nat-Network-Egress-C
-        subnet: Portal-Production-Private-C
 
     gatewayEndpoints:
       defaultPolicy: Default
@@ -228,19 +558,7 @@ vpcs:
             toPort: 443
             action: allow
             source: 0.0.0.0/0
-          - rule: 300
-            protocol: 6
-            fromPort: 22
-            toPort: 22
-            action: allow
-            source: 0.0.0.0/0
-          - rule: 400
-            protocol: 6
-            fromPort: 1024
-            toPort: 65535
-            action: allow
-            source: 0.0.0.0/0
-          - rule: 32766
+          - rule: 10000
             protocol: -1
             fromPort: 0
             toPort: 65535
@@ -266,10 +584,10 @@ vpcs:
     routeTables:
       - name: Portal-Production-Private-A
         routes:
-          - name: NatGatewayRoute
+          - name: TgwRoute
             destination: 0.0.0.0/0
-            type: natGateway
-            target: Nat-Network-Egress-A
+            type: transitGateway
+            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -278,10 +596,10 @@ vpcs:
             target: dynamodb
       - name: Portal-Production-Private-B
         routes:
-          - name: NatGatewayRoute
+          - name: TgwRoute
             destination: 0.0.0.0/0
-            type: natGateway
-            target: Nat-Network-Egress-B
+            type: transitGateway
+            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -290,10 +608,10 @@ vpcs:
             target: dynamodb
       - name: Portal-Production-Private-C
         routes:
-          - name: NatGatewayRoute
+          - name: TgwRoute
             destination: 0.0.0.0/0
-            type: natGateway
-            target: Nat-Network-Egress-C
+            type: transitGateway
+            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -345,6 +663,20 @@ vpcs:
         routeTable: Portal-Production-Public-C
         ipv4CidrBlock: {{ PortalProductionPublicAzCCidr }}
 
+    transitGatewayAttachments:
+      - name: Portal-Production
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Production
+        routeTablePropagations:
+          - Network-Main-Core
+          - Network-Main-Production
+        subnets:
+          - Portal-Production-Private-A
+          - Portal-Production-Private-B
+          - Portal-Production-Private-C
 
 vpcFlowLogs:
   trafficType: ALL
