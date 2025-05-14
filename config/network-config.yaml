@@ -32,24 +32,11 @@ transitGateways:
       - name: Network-Main-Datacenter
         routes: []
       - name: Network-Main-Development
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
       - name: Network-Main-Staging
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
+        routes: []
       - name: Network-Main-Production
-        routes:
-          - destinationCidrBlock: 0.0.0.0/0
-            attachment:
-              vpcName: Network-Egress
-              account: Network
-
+        routes: []
 
 centralNetworkServices:
   delegatedAdminAccount: Network
@@ -272,11 +259,7 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: a
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: a
+
 
       - name: Network-EgressTgwAttach-B
         routes:
@@ -285,11 +268,7 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: b
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: b
+
 
       - name: Network-EgressTgwAttach-C
         routes:
@@ -298,22 +277,14 @@ vpcs:
             type: networkFirewall
             target: "{{ AcceleratorPrefix }}-firewall"
             targetAvailabilityZone: c
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: c
+
       - name: Network-Inspection-Egress-A
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-A
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: a
+
 
           - name: S3Gateway
             type: gatewayEndpoint
@@ -328,11 +299,7 @@ vpcs:
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-B
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: b
+
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -346,11 +313,7 @@ vpcs:
             destination: 0.0.0.0/0
             type: natGateway
             target: Nat-Network-Egress-C
-          - name: TgwRoute
-            destination: {{ AwsCidr }}
-            type: transitGateway
-            target: Network-Main
-            targetAvailabilityZone: c
+
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -431,24 +394,7 @@ vpcs:
         routeTable: Network-Egress-Pub-C
         ipv4CidrBlock: {{ CentralEgressOutboundAzCCidr }}
 
-    transitGatewayAttachments:
-      - name: Network-Egress
-        options:
-          applianceModeSupport: enable
-        transitGateway:
-          name: Network-Main
-          account: Network
-        routeTableAssociations:
-          - Network-Main-Core
-        routeTablePropagations:
-          - Network-Main-Core
-          - Network-Main-Development
-          - Network-Main-Staging
-          - Network-Main-Production
-        subnets:
-          - Network-EgressTgwAttach-A
-          - Network-EgressTgwAttach-B
-          - Network-EgressTgwAttach-C
+
   - name: Portal-Development
     account: PortalDevelopment
     region: *HOME_REGION
@@ -585,10 +531,6 @@ vpcs:
     routeTables:
       - name: Portal-Development-Private-A
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -597,10 +539,6 @@ vpcs:
             target: dynamodb
       - name: Portal-Development-Private-B
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -609,10 +547,6 @@ vpcs:
             target: dynamodb
       - name: Portal-Development-Private-C
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -620,24 +554,11 @@ vpcs:
             type: gatewayEndpoint
             target: dynamodb
       - name: Portal-Development-Public-A
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+        routes: []
       - name: Portal-Development-Public-B
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+        routes: []
       - name: Portal-Development-Public-C
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
-
+        routes: []
     subnets:
       - name: Portal-Development-Private-A
         availabilityZone: a
@@ -664,20 +585,6 @@ vpcs:
         routeTable: Portal-Development-Public-C
         ipv4CidrBlock: {{ PortalDevelopmentPublicAzCCidr }}
 
-    transitGatewayAttachments:
-      - name: Portal-Development
-        transitGateway:
-          name: Network-Main
-          account: Network
-        routeTableAssociations:
-          - Network-Main-Development
-        routeTablePropagations:
-          - Network-Main-Core
-          - Network-Main-Development
-        subnets:
-          - Portal-Development-Private-A
-          - Portal-Development-Private-B
-          - Portal-Development-Private-C
   - name: Portal-Staging
     account: PortalStaging
     region: *HOME_REGION
@@ -814,10 +721,6 @@ vpcs:
     routeTables:
       - name: Portal-Staging-Private-A
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -826,10 +729,6 @@ vpcs:
             target: dynamodb
       - name: Portal-Staging-Private-B
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -838,10 +737,6 @@ vpcs:
             target: dynamodb
       - name: Portal-Staging-Private-C
         routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -849,24 +744,12 @@ vpcs:
             type: gatewayEndpoint
             target: dynamodb
       - name: Portal-Staging-Public-A
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+        routes: []
 
       - name: Portal-Staging-Public-B
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+        routes: []
       - name: Portal-Staging-Public-C
-        routes:
-          - name: TgwRoute
-            destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+        routes: []
 
     subnets:
       - name: Portal-Staging-Private-A
@@ -894,20 +777,6 @@ vpcs:
         routeTable: Portal-Staging-Public-C
         ipv4CidrBlock: {{ PortalStagingPublicAzCCidr }}
 
-    transitGatewayAttachments:
-      - name: Portal-Staging
-        transitGateway:
-          name: Network-Main
-          account: Network
-        routeTableAssociations:
-          - Network-Main-Staging
-        routeTablePropagations:
-          - Network-Main-Core
-          - Network-Main-Staging
-        subnets:
-          - Portal-Staging-Private-A
-          - Portal-Staging-Private-B
-          - Portal-Staging-Private-C
 
   - name: Portal-Production
     account: PortalProduction
@@ -1142,20 +1011,6 @@ vpcs:
         routeTable: Portal-Production-Public-C
         ipv4CidrBlock: {{ PortalProductionPublicAzCCidr }}
 
-    transitGatewayAttachments:
-      - name: Portal-Production
-        transitGateway:
-          name: Network-Main
-          account: Network
-        routeTableAssociations:
-          - Network-Main-Production
-        routeTablePropagations:
-          - Network-Main-Core
-          - Network-Main-Production
-        subnets:
-          - Portal-Production-Private-A
-          - Portal-Production-Private-B
-          - Portal-Production-Private-C
 
 vpcFlowLogs:
   trafficType: ALL
