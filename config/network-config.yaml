@@ -558,7 +558,19 @@ vpcs:
             toPort: 443
             action: allow
             source: 0.0.0.0/0
-          - rule: 10000
+          - rule: 300
+            protocol: 6
+            fromPort: 22
+            toPort: 22
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 400
+            protocol: 6
+            fromPort: 1024
+            toPort: 65535
+            action: allow
+            source: 0.0.0.0/0
+          - rule: 32766
             protocol: -1
             fromPort: 0
             toPort: 65535
