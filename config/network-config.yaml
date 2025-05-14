@@ -39,7 +39,7 @@ transitGateways:
         routes: []
 
 centralNetworkServices:
-  delegatedAdminAccount: Network  
+  delegatedAdminAccount: Network
   networkFirewall:
     firewalls:
       - name: "{{ AcceleratorPrefix }}-firewall"
