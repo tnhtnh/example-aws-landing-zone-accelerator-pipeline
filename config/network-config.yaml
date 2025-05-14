@@ -31,8 +31,6 @@ transitGateways:
         routes: []
       - name: Network-Main-Datacenter
         routes: []
-      - name: Network-Main-Development
-        routes: []
       - name: Network-Main-Production
         routes:
           - destinationCidrBlock: 0.0.0.0/0
@@ -432,8 +430,6 @@ vpcs:
           - Network-Main-Core
         routeTablePropagations:
           - Network-Main-Core
-          - Network-Main-Development
-          - Network-Main-Staging
           - Network-Main-Production
         subnets:
           - Network-EgressTgwAttach-A
