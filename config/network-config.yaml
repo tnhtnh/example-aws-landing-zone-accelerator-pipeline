@@ -920,6 +920,14 @@ vpcs:
     instanceTenancy: default
     useCentralEndpoints: false
 
+    natGateways:
+      - name: Nat-Network-Egress-A
+        subnet: Portal-Production-Private-A
+      - name: Nat-Network-Egress-B
+        subnet: Portal-Production-Private-B
+      - name: Nat-Network-Egress-C
+        subnet: Portal-Production-Private-C
+
     gatewayEndpoints:
       defaultPolicy: Default
       endpoints:
@@ -1055,10 +1063,10 @@ vpcs:
     routeTables:
       - name: Portal-Production-Private-A
         routes:
-          - name: TgwRoute
+          - name: NatGatewayRoute
             destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+            type: natGateway
+            target: Nat-Network-Egress-A
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -1067,10 +1075,10 @@ vpcs:
             target: dynamodb
       - name: Portal-Production-Private-B
         routes:
-          - name: TgwRoute
+          - name: NatGatewayRoute
             destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+            type: natGateway
+            target: Nat-Network-Egress-B
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -1079,10 +1087,10 @@ vpcs:
             target: dynamodb
       - name: Portal-Production-Private-C
         routes:
-          - name: TgwRoute
+          - name: NatGatewayRoute
             destination: 0.0.0.0/0
-            type: transitGateway
-            target: Network-Main
+            type: natGateway
+            target: Nat-Network-Egress-C
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
