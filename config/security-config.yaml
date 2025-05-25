@@ -8,7 +8,6 @@ centralSecurityServices:
     excludeAccounts: []
   scpRevertChangesConfig:
     enable: true
-  snsTopicName: SecurityHigh
   macie:
     enable: true
     excludeRegions:
