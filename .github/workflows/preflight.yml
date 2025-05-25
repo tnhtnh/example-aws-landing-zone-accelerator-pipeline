@@ -46,11 +46,53 @@ jobs:
         run: |
           cfn-lint config/customizations/*.yaml
 
-      - name: Validate config files against schemas
+      - name: Validate customizations-config
         uses: cardinalby/schema-validator-action@v3
         with:
-          schema: https://www.schemastore.org/api/json/catalog.json
-          file: config/*.yaml
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/customizations-config.json
+          file: config/customizations-config.yaml
+          all-errors: true
+
+      - name: Validate global-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/global-config.json
+          file: config/global-config.yaml
+          all-errors: true
+
+      - name: Validate accounts-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/accounts-config.json
+          file: config/accounts-config.yaml
+          all-errors: true
+
+      - name: Validate iam-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/iam-config.json
+          file: config/iam-config.yaml
+          all-errors: true
+
+      - name: Validate replacements-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/replacements-config.json
+          file: config/replacements-config.yaml
+          all-errors: true
+
+      - name: Validate organization-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/organization-config.json
+          file: config/organization-config.yaml
+          all-errors: true
+
+      - name: Validate security-config
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          schema: https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/main/source/packages/@aws-accelerator/config/lib/schemas/security-config.json
+          file: config/security-config.yaml
           all-errors: true
 
       # Optional: Run Pytest Tests (useful for CI validation)
