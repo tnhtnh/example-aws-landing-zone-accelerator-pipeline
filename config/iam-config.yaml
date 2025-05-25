@@ -24,7 +24,7 @@ policySets:
       - name: LZ-BP-Deafult-Boundary-Policy
         policy: iam-policies/default-sso-boundary-policy.json
 roleSets:
-  - deploymentTargets:
+  - NewdeploymentTargets:
       organizationalUnits:
         - Portal
         - Customer
