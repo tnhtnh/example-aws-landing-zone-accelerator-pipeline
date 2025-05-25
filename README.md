@@ -6,9 +6,12 @@ New to this repository? Check out the [Getting Started Guide](GETTING_STARTED.md
 
 ## Purpose
 
+While the LZA configuration is a great way to drive compliance and standards of your AWS enviroment, it can take up to 90 minutes to execute a build which can be frustrating time delay if the configuration is incorrect or incomplete. The purpose of this project is:
+
 *   **Version Control:** Maintain a history of LZA configuration changes.
 *   **Automation:** Automate the validation and deployment of LZA configurations via CI/CD.
 *   **Collaboration:** Facilitate team collaboration on infrastructure configuration.
+*   **Faster Feedback:** By performing LZA configuration tests, we can improve the change failure rate and the time duration for identifying failures. 
 
 ## Configuration Files (`config/`)
 
