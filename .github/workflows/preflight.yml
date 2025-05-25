@@ -50,7 +50,7 @@ jobs:
         uses: cardinalby/schema-validator-action@v1
         with:
           schema: https://www.schemastore.org/api/json/catalog.json
-          files: config/*.yaml
+          file: config/*.yaml
           all-errors: true
 
       # Optional: Run Pytest Tests (useful for CI validation)
