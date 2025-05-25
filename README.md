@@ -25,6 +25,24 @@ Refer to the official [LZA Configuration Documentation](https://docs.aws.amazon.
 
 This workflow automates the validation and deployment process.
 
+### GitFlow Diagram
+
+```mermaid
+graph TD
+    A[Feature Branch] -->|Push| B[Configuration Validation]
+    B -->|Success| C[Pull Request to master]
+    C -->|Merge| D[master branch]
+    D -->|Push| E[Configuration Validation]
+    E -->|Success| F[Preflight Checks]
+    F -->|Pass| G[Zip Configuration]
+    G --> H[Upload to S3]
+    H --> I[Trigger CodePipeline]
+    F -->|Fail| J[Build Fails]
+    K[Manual Workflow Run] -->|skip_preflight=true| L[Skip Preflight Check Failure]
+    L --> G
+```
+
+
 ### Triggers
 
 The workflow runs on:
@@ -56,14 +74,18 @@ The workflow runs on:
 
 ### Required GitHub Secrets
 
-The `deploy` job requires the following secrets (`Settings > Secrets and variables > Actions`):
+The `deploy` job requires the following variables (`Settings > Secrets and variables > Actions`):
 
-*   `AWS_OIDC_ROLE_ARN`: ARN of the IAM Role for GitHub Actions OIDC authentication. Must have permissions for S3 upload, CodePipeline start, and the preflight check actions (e.g., `cloudformation:ListStacks`, `controltower:ListLandingZones`, `controltower:GetLandingZone`).
-*   `AWS_REGION`: AWS region where LZA Home Resources (CodePipeline, S3 bucket) reside.
-*   `S3_BUCKET`: Name of the LZA configuration S3 bucket.
-*   `S3_KEY_PREFIX`: (Optional) Prefix within the S3 bucket for the zip file.
-*   `CODEPIPELINE_NAME`: Name of the LZA CodePipeline to trigger.
-*   `LZA_STACK_PREFIX`: Prefix used for LZA CloudFormation stacks (required for preflight check script).
+| Name | Type | Description |
+|------|------|-------------|
+| `AWS_OIDC_ROLE_ARN` | Secret | ARN of the IAM Role for GitHub Actions OIDC authentication. Must have permissions for S3 upload, CodePipeline start, and the preflight check actions (e.g., `cloudformation:ListStacks`, `controltower:ListLandingZones`, `controltower:GetLandingZone`). |
+| `AWS_REGION` | Environment | AWS region where LZA Home Resources (CodePipeline, S3 bucket) reside. |
+| `S3_BUCKET` | Environment | Name of the LZA configuration S3 bucket. |
+| `S3_KEY_PREFIX` | Environment | (Optional) Prefix within the S3 bucket for the zip file. |
+| `CODEPIPELINE_NAME` | Environment | Name of the LZA CodePipeline to trigger. |
+| `LZA_STACK_PREFIX` | Environment | Prefix used for LZA CloudFormation stacks (required for preflight check script). |
+
+Note: Only `AWS_OIDC_ROLE_ARN` needs to be added as a secret variable. All other variables should be added as environment variables.
 
 ## Usage
 
