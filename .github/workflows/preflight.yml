@@ -47,10 +47,11 @@ jobs:
           cfn-lint config/customizations/*.yaml
 
       - name: Validate config files against schemas
-        uses: cardinalby/schema-validator-action@v1
+        uses: cardinalby/schema-validator-action@v3
         with:
           schema: https://www.schemastore.org/api/json/catalog.json
           file: config/*.yaml
+          mode: strong
           all-errors: true
 
       # Optional: Run Pytest Tests (useful for CI validation)
