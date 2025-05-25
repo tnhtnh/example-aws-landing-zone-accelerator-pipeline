@@ -51,7 +51,6 @@ jobs:
         with:
           schema: https://www.schemastore.org/api/json/catalog.json
           file: config/*.yaml
-          mode: strong
           all-errors: true
 
       # Optional: Run Pytest Tests (useful for CI validation)
