@@ -2,5 +2,8 @@ boto3>=1.28.0
 pytest>=7.0.0
 pytest-cov>=3.0.0
 moto[controltower,cloudformation,sts,organizations,sso-admin,config,securityhub]>=4.0.0
-types-boto3>=1.28.0 
-requests
+types-boto3>=1.28.0
+requests>=2.25.0
+jinja2>=3.0.0
+pyyaml>=6.0
+jsonschema>=4.0.0
