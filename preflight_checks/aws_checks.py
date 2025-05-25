@@ -2,7 +2,7 @@
 import logging
 import os
 import sys
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError, BotoCoreError
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # --- Constants ---
 DEFAULT_STACK_PREFIX = "AWSAccelerator"
+DEFAULT_ENVIRONMENT = "lz"
 FAILED_STACK_STATUSES = [
     "CREATE_FAILED",
     "ROLLBACK_FAILED",
@@ -38,6 +39,46 @@ def get_aws_client(service_name: str, region_name: Optional[str] = None):
         logger.exception(f"Error initializing boto3 client for {service_name}: {e}")
         raise
 
+def get_stack_failure_details(cf_client, stack_name: str) -> List[Dict[str, Any]]:
+    """
+    Get detailed information about stack failures.
+    
+    Args:
+        cf_client: CloudFormation boto3 client
+        stack_name: Name of the stack to check
+        
+    Returns:
+        List of dictionaries containing failure details
+    """
+    failure_details = []
+    
+    try:
+        # Get stack events to find failure reasons
+        paginator = cf_client.get_paginator('describe_stack_events')
+        events_iterator = paginator.paginate(StackName=stack_name)
+        
+        for page in events_iterator:
+            for event in page.get('StackEvents', []):
+                # Look for events with status reasons (typically failures)
+                if 'ResourceStatus' in event and 'ResourceStatusReason' in event:
+                    status = event.get('ResourceStatus')
+                    if status.endswith('FAILED') or 'ROLLBACK' in status:
+                        failure_details.append({
+                            'logical_id': event.get('LogicalResourceId'),
+                            'resource_type': event.get('ResourceType'),
+                            'status': status,
+                            'reason': event.get('ResourceStatusReason'),
+                            'timestamp': event.get('Timestamp')
+                        })
+        
+        # Sort by timestamp to get most recent failures first
+        failure_details.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+    except ClientError as e:
+        logger.warning(f"Could not retrieve failure details for stack {stack_name}: {e}")
+    
+    return failure_details
+
 # --- Check Functions ---
 
 def check_cloudformation_stacks(
@@ -45,6 +86,7 @@ def check_cloudformation_stacks(
 ) -> bool:
     """
     Checks for failed CloudFormation stacks in a specific region with a given prefix.
+    Provides detailed information about failure reasons.
 
     Args:
         region_name: The AWS region to check.
@@ -76,6 +118,17 @@ def check_cloudformation_stacks(
                         f"Found failed CloudFormation stack: {stack_name} "
                         f"(Status: {stack_status}, Region: {region_name})"
                     )
+                    
+                    # Get detailed failure information
+                    failure_details = get_stack_failure_details(cf_client, stack_name)
+                    
+                    if failure_details:
+                        logger.error(f"Failure details for stack {stack_name}:")
+                        for i, detail in enumerate(failure_details[:5], 1):  # Show top 5 failures
+                            logger.error(f"  {i}. Resource: {detail['logical_id']} ({detail['resource_type']})")
+                            logger.error(f"     Status: {detail['status']}")
+                            logger.error(f"     Reason: {detail['reason']}")
+                    
                     failed_stacks_found.append(stack_name)
                     passed = False
 
@@ -225,6 +278,10 @@ def run_preflight_checks():
     logger.info("Starting preflight checks...")
 
     # --- Configuration ---
+    # Get environment from environment variable with default 'lz'
+    environment = os.getenv("ENVIRONMENT", DEFAULT_ENVIRONMENT)
+    logger.info(f"Using environment: {environment}")
+    
     # Region for CloudFormation checks (can be different from CT home region)
     check_region = os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION"))
     if not check_region:
@@ -239,10 +296,11 @@ def run_preflight_checks():
     # Defaulting to check_region, but make this configurable if needed.
     ct_home_region = os.getenv("CT_HOME_REGION", check_region)
 
-
-    stack_prefix = os.getenv("STACK_PREFIX", DEFAULT_STACK_PREFIX)
+    # Use environment in stack prefix if appropriate
+    stack_prefix = os.getenv("STACK_PREFIX", f"{DEFAULT_STACK_PREFIX}-{environment}")
 
     logger.info(f"Configuration:")
+    logger.info(f"  Environment: {environment}")
     logger.info(f"  Check Region: {check_region}")
     logger.info(f"  Control Tower Home Region: {ct_home_region}")
     logger.info(f"  CloudFormation Stack Prefix: {stack_prefix}")
@@ -291,4 +349,4 @@ def run_preflight_checks():
 
 
 if __name__ == "__main__":
-    run_preflight_checks() 
+    run_preflight_checks()

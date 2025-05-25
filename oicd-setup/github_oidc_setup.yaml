@@ -84,7 +84,15 @@ Resources:
               - Effect: Allow # Permissions for Preflight Checks
                 Action:
                   - cloudformation:ListStacks
-                  # Removed config:DescribeComplianceByConfigRule as it wasn't in the provided file snippet and might not be needed for basic CFN checks
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:DescribeStackSummary
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:DescribeStackSummary
                 Resource: "*" # These actions often require broad permissions or specific resource ARNs if available
 
 Outputs:

@@ -8,14 +8,12 @@ on:
     paths:
       - 'config/**'
       - '.github/workflows/lza_config_ci.yaml'
-      - 'schema.yaml'
   pull_request:
     branches:
       - master
     paths:
       - 'config/**'
       - '.github/workflows/lza_config_ci.yaml'
-      - 'schema.yaml'
   workflow_dispatch:
     inputs:
       skip_preflight:

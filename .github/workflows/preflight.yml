@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - master
-      - '**' # All branches
+      - "**" # All branches
   pull_request:
     branches:
       - master
@@ -34,7 +34,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Or your preferred Python 3.9+ version
+          python-version: "3.11" # Or your preferred Python 3.9+ version
 
       - name: Install dependencies
         run: |
@@ -46,6 +46,13 @@ jobs:
         run: |
           cfn-lint config/customizations/*.yaml
 
+      - name: Validate config files against schemas
+        uses: cardinalby/schema-validator-action@v1
+        with:
+          schema: https://www.schemastore.org/api/json/catalog.json
+          files: config/*.yaml
+          all-errors: true
+
       # Optional: Run Pytest Tests (useful for CI validation)
       - name: Run Unit Tests with Coverage
         run: |
@@ -56,4 +63,4 @@ jobs:
       #   uses: codecov/codecov-action@v4
       #   with:
       #     token: ${{ secrets.CODECOV_TOKEN }} # Store Codecov token in GitHub secrets
-      #     slug: ${{ github.repository }} 
+      #     slug: ${{ github.repository }}

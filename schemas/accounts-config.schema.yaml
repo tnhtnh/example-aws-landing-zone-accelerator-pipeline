@@ -1,2 +1,0 @@
-mandatoryAccounts: list(include('mandatory_account_schema'), required=True)
-workloadAccounts: list(include('workload_account_schema'), required=True) 

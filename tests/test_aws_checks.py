@@ -17,6 +17,7 @@ TEST_REGION = "us-east-1"
 CT_HOME_REGION = "us-east-1" # Assuming same for tests
 STACK_PREFIX = "AWSAccelerator"
 ALT_STACK_PREFIX = "MyCustomPrefix"
+TEST_ENV = "lz"
 LZ_ARN = f"arn:aws:controltower:{CT_HOME_REGION}:123456789012:landingzone/EXAMPLE1-LZ"
 
 # Helper to set environment variables
@@ -26,6 +27,7 @@ def default_environment_variables(monkeypatch):
     monkeypatch.setenv("AWS_REGION", TEST_REGION)
     monkeypatch.setenv("CT_HOME_REGION", CT_HOME_REGION)
     monkeypatch.setenv("STACK_PREFIX", STACK_PREFIX)
+    monkeypatch.setenv("ENVIRONMENT", TEST_ENV)
     # Ensure default AWS creds for moto
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
@@ -69,6 +71,16 @@ def test_cfn_matching_failed_stack():
                 "StackId": f"arn:aws:cloudformation:{TEST_REGION}:123456789012:stack/{STACK_PREFIX}-App1-Failed/guid"
             }]
         }]
+        # Mock the get_stack_failure_details function
+        mock_cfn.get_paginator.return_value.paginate.return_value = [{
+            "StackEvents": [{
+                "LogicalResourceId": "S3Bucket",
+                "ResourceType": "AWS::S3::Bucket",
+                "ResourceStatus": "CREATE_FAILED",
+                "ResourceStatusReason": "Bucket name already exists",
+                "Timestamp": "2023-01-01T00:00:00Z"
+            }]
+        }]
         mock_boto_client.side_effect = lambda service, **kwargs: mock_cfn if service == 'cloudformation' else MagicMock()
         assert aws_checks.check_cloudformation_stacks(TEST_REGION, STACK_PREFIX) is False
 
@@ -110,6 +122,11 @@ def test_cfn_mixed_stacks_one_failed_match():
                  ]
             }
         ]
+        # Mock the describe_stack_events call for failure details
+        mock_cfn.get_paginator.return_value.paginate.side_effect = [
+            mock_cfn.get_paginator.return_value.paginate.return_value,  # First call for list_stacks
+            [{"StackEvents": []}]  # Second call for describe_stack_events
+        ]
         mock_boto_client.side_effect = lambda service, **kwargs: mock_cfn if service == 'cloudformation' else MagicMock()
         assert aws_checks.check_cloudformation_stacks(TEST_REGION, STACK_PREFIX) is False
 
@@ -133,6 +150,11 @@ def test_cfn_custom_prefix_failed_match(monkeypatch):
                 }
             ]
         }]
+        # Mock the describe_stack_events call for failure details
+        mock_cfn.get_paginator.return_value.paginate.side_effect = [
+            mock_cfn.get_paginator.return_value.paginate.return_value,  # First call for list_stacks
+            [{"StackEvents": []}]  # Second call for describe_stack_events
+        ]
         mock_boto_client.side_effect = lambda service, **kwargs: mock_cfn if service == 'cloudformation' else MagicMock()
         # Call the function directly to test its logic with the *specific* prefix passed
         assert aws_checks.check_cloudformation_stacks(TEST_REGION, ALT_STACK_PREFIX) is False
@@ -261,7 +283,9 @@ def test_run_preflight_checks_all_pass(mock_exit, mock_ct_check, mock_cfn_check,
     mock_cfn_check.return_value = True
     mock_ct_check.return_value = True
     aws_checks.run_preflight_checks()
-    mock_cfn_check.assert_called_once_with(TEST_REGION, STACK_PREFIX)
+    # Check with environment-aware stack prefix
+    expected_stack_prefix = f"{STACK_PREFIX}-{TEST_ENV}"
+    mock_cfn_check.assert_called_once_with(TEST_REGION, expected_stack_prefix)
     mock_ct_check.assert_called_once_with(CT_HOME_REGION) # Uses CT_HOME_REGION
     mock_exit.assert_called_once_with(0)
 
@@ -274,7 +298,8 @@ def test_run_preflight_checks_cfn_fails(mock_exit, mock_ct_check, mock_cfn_check
     mock_cfn_check.return_value = False
     mock_ct_check.return_value = True
     aws_checks.run_preflight_checks()
-    mock_cfn_check.assert_called_once_with(TEST_REGION, STACK_PREFIX)
+    expected_stack_prefix = f"{STACK_PREFIX}-{TEST_ENV}"
+    mock_cfn_check.assert_called_once_with(TEST_REGION, expected_stack_prefix)
     mock_ct_check.assert_called_once_with(CT_HOME_REGION)
     mock_exit.assert_called_once_with(1)
 
@@ -287,7 +312,8 @@ def test_run_preflight_checks_ct_fails(mock_exit, mock_ct_check, mock_cfn_check,
     mock_cfn_check.return_value = True
     mock_ct_check.return_value = False
     aws_checks.run_preflight_checks()
-    mock_cfn_check.assert_called_once_with(TEST_REGION, STACK_PREFIX)
+    expected_stack_prefix = f"{STACK_PREFIX}-{TEST_ENV}"
+    mock_cfn_check.assert_called_once_with(TEST_REGION, expected_stack_prefix)
     mock_ct_check.assert_called_once_with(CT_HOME_REGION)
     mock_exit.assert_called_once_with(1)
 
@@ -300,7 +326,8 @@ def test_run_preflight_checks_both_fail(mock_exit, mock_ct_check, mock_cfn_check
     mock_cfn_check.return_value = False
     mock_ct_check.return_value = False
     aws_checks.run_preflight_checks()
-    mock_cfn_check.assert_called_once_with(TEST_REGION, STACK_PREFIX)
+    expected_stack_prefix = f"{STACK_PREFIX}-{TEST_ENV}"
+    mock_cfn_check.assert_called_once_with(TEST_REGION, expected_stack_prefix)
     mock_ct_check.assert_called_once_with(CT_HOME_REGION)
     mock_exit.assert_called_once_with(1)
 
@@ -318,6 +345,21 @@ def test_run_preflight_checks_no_region(mock_exit, mock_ct_check, mock_cfn_check
     # mock_cfn_check.assert_not_called() # Removed: Check functions might still be entered after mocked sys.exit
     # mock_ct_check.assert_not_called() # Removed: Check functions might still be entered after mocked sys.exit
     mock_exit.assert_called_once_with(1) # This is the key assertion
+
+@patch('preflight_checks.aws_checks.check_cloudformation_stacks')
+@patch('preflight_checks.aws_checks.check_control_tower_landing_zone')
+@patch('sys.exit')
+def test_run_preflight_checks_custom_environment(mock_exit, mock_ct_check, mock_cfn_check, monkeypatch):
+    """Test main runner with custom environment."""
+    monkeypatch.setenv("AWS_REGION", TEST_REGION)
+    monkeypatch.setenv("ENVIRONMENT", "dev") # Set custom environment
+    mock_cfn_check.return_value = True
+    mock_ct_check.return_value = True
+    aws_checks.run_preflight_checks()
+    expected_stack_prefix = f"{STACK_PREFIX}-dev"
+    mock_cfn_check.assert_called_once_with(TEST_REGION, expected_stack_prefix)
+    mock_ct_check.assert_called_once_with(CT_HOME_REGION)
+    mock_exit.assert_called_once_with(0)
 
 # Add __init__.py files if they don't exist
 @pytest.fixture(scope="session", autouse=True)
@@ -344,4 +386,4 @@ def create_init_files():
     # for init_file in created_files:
     #     if os.path.exists(init_file):
     #         os.remove(init_file)
-    #         print(f"Removed {init_file}") # Debugging print 
+    #         print(f"Removed {init_file}") # Debugging print

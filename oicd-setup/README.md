@@ -2,6 +2,9 @@
 
 This CloudFormation template automates the setup of the necessary AWS IAM resources to allow your GitHub Actions workflow to securely authenticate with AWS using OpenID Connect (OIDC) and deploy Landing Zone Accelerator (LZA) configuration changes.
 
+> **Important:**
+> This stack **must be deployed in the same AWS account (the management account) and in the same AWS region where the Landing Zone Accelerator (LZA) was deployed**. Deploying in a different account or region will prevent the workflow from functioning correctly.
+
 ## Purpose
 
 The template creates:
@@ -16,14 +19,18 @@ Using OIDC is more secure than storing long-lived AWS access keys as GitHub secr
 
 ## Prerequisites
 
-*   An AWS account.
+*   An AWS account (**must be the management account where LZA is deployed**).
 *   Permissions to create IAM OIDC Providers and IAM Roles/Policies within that account.
 *   The name of your LZA S3 configuration bucket.
 *   The full ARN of your LZA CodePipeline.
+*   **You must deploy this stack in the same AWS region as your LZA deployment.**
 
 ## Deployment
 
 You can deploy this stack using the AWS Management Console or the AWS CLI.
+
+> **Note:**
+> Ensure you are deploying in the **same AWS account (management account)** and **region** as your LZA deployment.
 
 **Using AWS CLI:**
 
