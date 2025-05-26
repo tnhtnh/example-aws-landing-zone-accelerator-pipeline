@@ -59,25 +59,6 @@ The workflow runs on:
 3.  **Manual Trigger (`workflow_dispatch`):** Allows running the workflow manually via the GitHub Actions UI.
     *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped. **Only use when `AWS ControlTower` is in an unknown state and re-executing this pipeline will address the issue.**
 
-### Jobs
-
-1.  **`validate`:**
-    *   Runs on all pushes and pull requests specified in the triggers.
-    *   Checks out the code.
-    *   Installs `yamllint`.
-    *   Lints all YAML files in the `config/` directory to ensure correct syntax and basic style.
-
-2.  **`deploy`:**
-    *   Runs **only** on push events to the `main` branch, after the `validate` job succeeds.
-    *   Checks out the code.
-    *   **Configure AWS Credentials:** Authenticates to AWS using OIDC via an IAM role specified in secrets.
-    *   **Run LZA Preflight Checks (Conditional):**
-        *   Installs Python dependencies from `requirements.txt`.
-        *   Executes the `lza_preflight_check.py` script (checking for failed CloudFormation stacks and Control Tower status).
-        *   **Skipped if:** The workflow was triggered manually (`workflow_dispatch`) **and** the `skip_preflight` input was set to `true`.
-    *   **Zip Configuration Files:** Creates `aws-accelerator-config.zip` containing the contents of the `config/` directory.
-    *   **Upload Config to S3:** Uploads the zip file to the LZA configuration S3 bucket specified in secrets.
-    *   **Trigger CodePipeline:** Starts an execution of the LZA CodePipeline specified in secrets, providing a link to the execution details.
 
 ### Required GitHub Secrets
 
