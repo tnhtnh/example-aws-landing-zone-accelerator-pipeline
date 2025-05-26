@@ -2,14 +2,14 @@ providers: []
 policySets:
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Customer
     policies:
       - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
         policy: iam-policies/ci-role-developer-boundary-policy.json
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Infrastructure
         - Customer
         - Security
@@ -26,7 +26,7 @@ policySets:
 roleSets:
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Customer
     roles:
       - name: CI-Role-Developer
@@ -39,7 +39,7 @@ roleSets:
         boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Infrastructure
         - Customer
         - Security

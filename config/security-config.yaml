@@ -88,7 +88,7 @@ awsConfig:
         organizationalUnits:
           - Security
           - Infrastructure
-          - Portal
+          - SomeEnv
           - Customer
         accounts:
           - Management

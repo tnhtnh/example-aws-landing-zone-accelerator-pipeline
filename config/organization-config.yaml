@@ -2,10 +2,10 @@ enable: true
 organizationalUnits:
   - name: Security
   - name: Infrastructure
-  - name: Portal
-  - name: Portal/Development
-  - name: Portal/Staging
-  - name: Portal/Production
+  - name: SomeEnv
+  - name: SomeEnv/Development
+  - name: SomeEnv/Staging
+  - name: SomeEnv/Production
   - name: Customer
   - name: Customer/Networking
   - name: Customer/Accounts

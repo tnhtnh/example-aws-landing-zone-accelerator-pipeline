@@ -4,7 +4,7 @@ mandatoryAccounts:
       The management (primary) account. Do not change the name field for this
       mandatory account. Note, the account name key does not need to match the
       AWS account name.
-    email: bjsslztest@gmail.com
+    email: someexamplelztest@gmail.com
     organizationalUnit: Root
     warm: false
   - name: LogArchive
@@ -12,7 +12,7 @@ mandatoryAccounts:
       The log archive account. Do not change the name field for this mandatory
       account. Note, the account name key does not need to match the AWS account
       name.
-    email: bjsslztest+new-logs@gmail.com
+    email: someexamplelztest+new-logs@gmail.com
     organizationalUnit: Security
     warm: false
   - name: Audit
@@ -20,15 +20,15 @@ mandatoryAccounts:
       The security audit account (also referred to as the audit account). Do not
       change the name field for this mandatory account. Note, the account name
       key does not need to match the AWS account name.
-    email: bjsslztest+new-audit@gmail.com
+    email: someexamplelztest+new-audit@gmail.com
     organizationalUnit: Security
     warm: false
 workloadAccounts:
   - name: Network
     description: The shared network account is used for shared networking resources. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: bjsslztest+new-network@gmail.com
+    email: someexamplelztest+new-network@gmail.com
     organizationalUnit: Infrastructure
-  - name: PortalProduction
-    description: The Portal Production account is used for the Portal Production environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: bjsslztest+new-portal-production@gmail.com
-    organizationalUnit: Portal/Production
+  - name: SomeEnvProduction
+    description: The SomeEnv Production account is used for the SomeEnv Production environment. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    email: someexamplelztest+new-SomeEnv-production@gmail.com
+    organizationalUnit: SomeEnv/Production
