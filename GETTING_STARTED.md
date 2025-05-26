@@ -1,6 +1,10 @@
 # Getting Started
 
-## 1. Deploy the Landing Zone Accelerator
+## 1. Fork this Repository
+
+Fork this repository to your own GitHub account to create a copy that you can modify.
+
+## 2. Deploy the Landing Zone Accelerator
 
 Deploy the AWS Landing Zone Accelerator by following the official documentation:
 https://aws.amazon.com/solutions/implementations/landing-zone-accelerator-on-aws/
@@ -52,3 +56,4 @@ For making changes to your Landing Zone configuration:
 3. Create a pull request back to main
 4. After review and approval, merge the PR to main
 5. The CI/CD pipeline will automatically execute from main, deploying your changes to AWS
+6. Make incremental changes to your landing zone configuration based on your requirements
