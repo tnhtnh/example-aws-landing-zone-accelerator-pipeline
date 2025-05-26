@@ -89,7 +89,7 @@ awsConfig:
           - Security
           - Infrastructure
           - SomeEnv
-          - Customer
+          - DataPlatfom
         accounts:
           - Management
       rules:

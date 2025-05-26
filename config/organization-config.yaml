@@ -6,9 +6,9 @@ organizationalUnits:
   - name: SomeEnv/Development
   - name: SomeEnv/Staging
   - name: SomeEnv/Production
-  - name: Customer
-  - name: Customer/Networking
-  - name: Customer/Accounts
+  - name: DataPlatfom
+  - name: DataPlatfom/Networking
+  - name: DataPlatfom/Accounts
   - name: Sandbox
   - name: Suspended
     ignore: true
@@ -23,10 +23,10 @@ serviceControlPolicies:
     type: customerManaged
     deploymentTargets:
       organizationalUnits: []
-  - name: "{{ AcceleratorPrefix }}-Customer-Policy"
+  - name: "{{ AcceleratorPrefix }}-DataPlatfom-Policy"
     description: >
-      Customer resource policy - Apply to Customer accounts
-    policy: service-control-policies/Customer-Resource-Policy.json
+      DataPlatfom resource policy - Apply to DataPlatfom accounts
+    policy: service-control-policies/DataPlatfom-Resource-Policy.json
     type: customerManaged
     deploymentTargets:
       organizationalUnits: []

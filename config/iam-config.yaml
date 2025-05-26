@@ -3,7 +3,7 @@ policySets:
   - deploymentTargets:
       organizationalUnits:
         - SomeEnv
-        - Customer
+        - DataPlatfom
     policies:
       - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
         policy: iam-policies/ci-role-developer-boundary-policy.json
@@ -11,7 +11,7 @@ policySets:
       organizationalUnits:
         - SomeEnv
         - Infrastructure
-        - Customer
+        - DataPlatfom
         - Security
     policies:
       - name: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
@@ -27,7 +27,7 @@ roleSets:
   - deploymentTargets:
       organizationalUnits:
         - SomeEnv
-        - Customer
+        - DataPlatfom
     roles:
       - name: CI-Role-Developer
         assumedBy:
@@ -41,7 +41,7 @@ roleSets:
       organizationalUnits:
         - SomeEnv
         - Infrastructure
-        - Customer
+        - DataPlatfom
         - Security
     roles:
       - name: CI-Role-PlatformEngineer

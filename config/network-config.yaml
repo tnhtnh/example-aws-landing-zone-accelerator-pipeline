@@ -166,13 +166,13 @@ centralNetworkServices:
             - "{{ SomeEnvCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
         - name: "{{ AcceleratorPrefix }}-customer-pool"
-          description: "Customer IP Space."
+          description: "DataPlatfom IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ CustomerCidr }}"
+            - "{{ DataPlatfomCidr }}"
           shareTargets:
             organizationalUnits:
-              - Customer/Accounts
+              - DataPlatfom/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
 
   route53Resolver:
@@ -728,11 +728,11 @@ vpcFlowLogs:
 
 
 vpcTemplates:
-  - name: CustomerVPC
+  - name: DataPlatfomVPC
     region: {{ AcceleratorHomeRegion }}
     deploymentTargets:
       organizationalUnits:
-        - Customer/Accounts
+        - DataPlatfom/Accounts
     useCentralEndpoints: false
     ipamAllocations:
       - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
@@ -742,55 +742,55 @@ vpcTemplates:
     enableDnsSupport: true
     instanceTenancy: default
     routeTables:
-      - name: CustomerVPC-Public-RouteTable-A
+      - name: DataPlatfomVPC-Public-RouteTable-A
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: CustomerVPC-Public-RouteTable-B
+      - name: DataPlatfomVPC-Public-RouteTable-B
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: CustomerVPC-Public-RouteTable-C
+      - name: DataPlatfomVPC-Public-RouteTable-C
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
 
-      - name: CustomerVPC-Private-RouteTable-A
+      - name: DataPlatfomVPC-Private-RouteTable-A
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-A
+            target: Nat-DataPlatfomVPC-Public-A
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: CustomerVPC-Private-RouteTable-B
+      - name: DataPlatfomVPC-Private-RouteTable-B
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-B
+            target: Nat-DataPlatfomVPC-Public-B
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: CustomerVPC-Private-RouteTable-C
+      - name: DataPlatfomVPC-Private-RouteTable-C
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-C
+            target: Nat-DataPlatfomVPC-Public-C
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -799,50 +799,50 @@ vpcTemplates:
             target: dynamodb
 
     subnets:
-      - name: CustomerVPC-Public-Subnet-A
+      - name: DataPlatfomVPC-Public-Subnet-A
         availabilityZone: a
-        routeTable: CustomerVPC-Public-RouteTable-A
+        routeTable: DataPlatfomVPC-Public-RouteTable-A
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Public-Subnet-B
+      - name: DataPlatfomVPC-Public-Subnet-B
         availabilityZone: b
-        routeTable: CustomerVPC-Public-RouteTable-B
+        routeTable: DataPlatfomVPC-Public-RouteTable-B
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Public-Subnet-C
+      - name: DataPlatfomVPC-Public-Subnet-C
         availabilityZone: c
-        routeTable: CustomerVPC-Public-RouteTable-C
+        routeTable: DataPlatfomVPC-Public-RouteTable-C
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-A
+      - name: DataPlatfomVPC-Private-Subnet-A
         availabilityZone: a
-        routeTable: CustomerVPC-Private-RouteTable-A
+        routeTable: DataPlatfomVPC-Private-RouteTable-A
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-B
+      - name: DataPlatfomVPC-Private-Subnet-B
         availabilityZone: b
-        routeTable: CustomerVPC-Private-RouteTable-B
+        routeTable: DataPlatfomVPC-Private-RouteTable-B
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-C
+      - name: DataPlatfomVPC-Private-Subnet-C
         availabilityZone: c
-        routeTable: CustomerVPC-Private-RouteTable-C
+        routeTable: DataPlatfomVPC-Private-RouteTable-C
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
 
     natGateways:
-      - name: Nat-CustomerVPC-Public-A
-        subnet: CustomerVPC-Public-Subnet-A
-      - name: Nat-CustomerVPC-Public-B
-        subnet: CustomerVPC-Public-Subnet-B
-      - name: Nat-CustomerVPC-Public-C
-        subnet: CustomerVPC-Public-Subnet-C
+      - name: Nat-DataPlatfomVPC-Public-A
+        subnet: DataPlatfomVPC-Public-Subnet-A
+      - name: Nat-DataPlatfomVPC-Public-B
+        subnet: DataPlatfomVPC-Public-Subnet-B
+      - name: Nat-DataPlatfomVPC-Public-C
+        subnet: DataPlatfomVPC-Public-Subnet-C
     gatewayEndpoints:
       defaultPolicy: Default
       endpoints:
@@ -852,9 +852,9 @@ vpcTemplates:
       central: false
       defaultPolicy: Default
       subnets:
-        - CustomerVPC-Private-Subnet-A
-        - CustomerVPC-Private-Subnet-B
-        - CustomerVPC-Private-Subnet-C
+        - DataPlatfomVPC-Private-Subnet-A
+        - DataPlatfomVPC-Private-Subnet-B
+        - DataPlatfomVPC-Private-Subnet-C
       endpoints:
         - service: ec2
         - service: ec2messages

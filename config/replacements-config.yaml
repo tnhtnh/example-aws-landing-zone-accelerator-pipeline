@@ -2,7 +2,7 @@ globalReplacements:
   # Accelerator Prefix
   - key: AcceleratorPrefix
     type: String
-    value: testlz
+    value: lza
   # Home Region
   - key: AcceleratorHomeRegion
     type: String
@@ -32,13 +32,13 @@ globalReplacements:
   # High level ranges
   - key: AwsCidr
     type: String
-    value: 10.128.0.0/10
+    value: 172.16.0.0/12
   - key: CoreCidr
     type: String
-    value: 10.128.0.0/14
+    value: 172.16.0.0/16
   - key: SomeEnvCidr
     type: String
-    value: 10.132.0.0/15
+    value: 172.18.0.0/15
   - key: SomeEnvProductionCidr
     type: String
     value: 192.168.0.0/24
@@ -48,9 +48,9 @@ globalReplacements:
   # - key: WorkloadInfrastructureCidr
   #  type: String
   #  value: 10.134.0.0/15
-  - key: CustomerCidr
+  - key: DataPlatfomCidr
     type: String
-    value: 10.136.0.0/13
+    value: 172.24.0.0/13
   #  - key: OutsideAwsCidr
   #    type: String
   #    value: 10.0.0.0/9
@@ -59,61 +59,59 @@ globalReplacements:
   #   value: 10.192.0.0/10
   - key: CentralEgressCidr
     type: String
-    value: 10.128.0.0/18
+    value: 172.16.0.0/18
   - key: CentralEgressTgwAzACidr
     type: String
-    value: 10.128.0.0/24
+    value: 172.16.0.0/24
   - key: CentralEgressTgwAzBCidr
     type: String
-    value: 10.128.1.0/24
+    value: 172.16.1.0/24
   - key: CentralEgressTgwAzCCidr
     type: String
-    value: 10.128.2.0/24
+    value: 172.16.2.0/24
   - key: CentralEgressNFAzACidr
     type: String
-    value: 10.128.4.0/24
+    value: 172.16.4.0/24
   - key: CentralEgressNFAzBCidr
     type: String
-    value: 10.128.5.0/24
+    value: 172.16.5.0/24
   - key: CentralEgressNFAzCCidr
     type: String
-    value: 10.128.6.0/24
+    value: 172.16.6.0/24
   - key: CentralEgressOutboundAzACidr
     type: String
-    value: 10.128.8.0/24
+    value: 172.16.8.0/24
   - key: CentralEgressOutboundAzBCidr
     type: String
-    value: 10.128.9.0/24
+    value: 172.16.9.0/24
   - key: CentralEgressOutboundAzCCidr
     type: String
-    value: 10.128.10.0/24
+    value: 172.16.10.0/24
   - key: OnPremisesPrefixList
     type: String
-    value: 10.0.0.0/9
-
-    value: 10.132.112.0/21
+    value: 172.0.0.0/8
   # SomeEnv Production
   - key: SomeEnvProductionCidr
     type: String
-    value: 10.132.128.0/18
+    value: 172.20.0.0/18
   - key: SomeEnvProductionPublicAzACidr
     type: String
-    value: 10.132.128.0/26
+    value: 172.20.0.0/26
   - key: SomeEnvProductionPublicAzBCidr
     type: String
-    value: 10.132.128.64/26
+    value: 172.20.0.64/26
   - key: SomeEnvProductionPublicAzCCidr
     type: String
-    value: 10.132.128.128/26
+    value: 172.20.0.128/26
   #  - key: SomeEnvProductionPrivateCidr
   #    type: String
   #    value: 10.132.160.0/19
   - key: SomeEnvProductionPrivateAzACidr
     type: String
-    value: 10.132.160.0/21
+    value: 172.20.8.0/21
   - key: SomeEnvProductionPrivateAzBCidr
     type: String
-    value: 10.132.168.0/21
+    value: 172.20.16.0/21
   - key: SomeEnvProductionPrivateAzCCidr
     type: String
-    value: 10.132.176.0/21
+    value: 172.20.24.0/21
