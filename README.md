@@ -1,4 +1,4 @@
-# AWS Landing Zone Accelerator (LZA) Configuration
+# AWS Landing Zone Accelerator (LZA) Configuration Manager
 
 This repository manages the configuration files for deploying an AWS environment using the [Landing Zone Accelerator on AWS (LZA)](https://aws.amazon.com/solutions/implementations/landing-zone-accelerator-on-aws/). It utilizes a GitHub Actions workflow for validation and automated deployment.
 
@@ -12,6 +12,8 @@ While the LZA configuration is a great way to drive compliance and standards of 
 *   **Automation:** Automate the validation and deployment of LZA configurations via CI/CD.
 *   **Collaboration:** Facilitate team collaboration on infrastructure configuration.
 *   **Faster Feedback:** By performing LZA configuration tests, we can improve the change failure rate and the time duration for identifying failures. 
+
+Simply, fork this repo and follow the [Getting Started Guide](GETTING_STARTED.md) to manage your configuration in this repository.
 
 ## Configuration Files (`config/`)
 
