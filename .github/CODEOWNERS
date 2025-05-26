@@ -1,0 +1,18 @@
+# This is a CODEOWNERS file that defines individuals or teams responsible for code in this repository
+# Each line is a file pattern followed by one or more owners
+
+# These owners will be the default owners for everything in the repo
+# *       @username
+
+# Order is important; the last matching pattern takes precedence
+# Example: Backend code owned by backend team
+# /backend/  @org/backend-team
+
+# Example: Config files owned by platform team
+# *.config   @org/platform-team
+
+# Example: Documentation owned by docs team
+# /docs/     @org/docs-team
+
+# Example: CI/CD workflow files owned by DevOps
+# /.github/workflows/    @org/devops-team
