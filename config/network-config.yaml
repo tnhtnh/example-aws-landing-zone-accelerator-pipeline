@@ -19,7 +19,7 @@ transitGateways:
     shareTargets:
       organizationalUnits:
         - Infrastructure
-        - Portal
+        - SomeEnv
     asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
@@ -79,22 +79,22 @@ centralNetworkServices:
               # Block traffic between production VPCs
               - action: DROP
                 header:
-                  destination: {{ PortalProductionCidr }}
+                  destination: {{ SomeEnvProductionCidr }}
                   destinationPort: ANY
                   direction: ANY
                   protocol: IP
-                  source: {{ PortalStagingCidr }}
+                  source: {{ SomeEnvStagingCidr }}
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
                     settings: ["100"]
               - action: DROP
                 header:
-                  destination: {{ PortalProductionCidr }}
+                  destination: {{ SomeEnvProductionCidr }}
                   destinationPort: ANY
                   direction: ANY
                   protocol: IP
-                  source: {{ PortalDevelopmentCidr }}
+                  source: {{ SomeEnvDevelopmentCidr }}
                   sourcePort: ANY
                 ruleOptions:
                   - keyword: sid
@@ -129,9 +129,9 @@ centralNetworkServices:
             ipSets:
               name: HOME_NET
               definition:
-                - {{ PortalProductionCidr }}
-                - {{ PortalStagingCidr }}
-                - {{ PortalDevelopmentCidr }}
+                - {{ SomeEnvProductionCidr }}
+                - {{ SomeEnvStagingCidr }}
+                - {{ SomeEnvDevelopmentCidr }}
             portSets:
               name: HOME_NET
               definition:
@@ -159,20 +159,20 @@ centralNetworkServices:
           provisionedCidrs:
             - "{{ CoreCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-        - name: "{{ AcceleratorPrefix }}-portal-pool"
-          description: "Portal IP Space."
+        - name: "{{ AcceleratorPrefix }}-SomeEnv-pool"
+          description: "SomeEnv IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ PortalCidr }}"
+            - "{{ SomeEnvCidr }}"
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
         - name: "{{ AcceleratorPrefix }}-customer-pool"
-          description: "Customer IP Space."
+          description: "DataPlatfom IP Space."
           locale: ap-southeast-2
           provisionedCidrs:
-            - "{{ CustomerCidr }}"
+            - "{{ DataPlatfomCidr }}"
           shareTargets:
             organizationalUnits:
-              - Customer/Accounts
+              - DataPlatfom/Accounts
           sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
 
   route53Resolver:
@@ -184,9 +184,9 @@ centralNetworkServices:
       shareTargets:
         organizationalUnits:
           - Infrastructure
-          - Portal/Development
-          - Portal/Staging
-          - Portal/Production
+          - SomeEnv/Development
+          - SomeEnv/Staging
+          - SomeEnv/Production
 
     firewallRuleGroups:
       - name: "{{ AcceleratorPrefix }}-block-group"
@@ -213,9 +213,9 @@ centralNetworkServices:
         shareTargets:
           organizationalUnits:
             - Infrastructure
-            - Portal/Development
-            - Portal/Staging
-            - Portal/Production
+            - SomeEnv/Development
+            - SomeEnv/Staging
+            - SomeEnv/Production
 
 endpointPolicies:
   - name: Default
@@ -436,11 +436,11 @@ vpcs:
           - Network-EgressTgwAttach-B
           - Network-EgressTgwAttach-C
 
-  - name: Portal-Production
-    account: PortalProduction
+  - name: SomeEnv-Production
+    account: SomeEnvProduction
     region: *HOME_REGION
     cidrs:
-      - {{ PortalProductionCidr }}
+      - {{ SomeEnvProductionCidr }}
     internetGateway: true
     enableDnsHostnames: true
     enableDnsSupport: true
@@ -457,9 +457,9 @@ vpcs:
       central: false
       defaultPolicy: Default
       subnets:
-        - Portal-Production-Private-A
-        - Portal-Production-Private-B
-        - Portal-Production-Private-C
+        - SomeEnv-Production-Private-A
+        - SomeEnv-Production-Private-B
+        - SomeEnv-Production-Private-C
       endpoints:
         - service: ec2
         - service: ec2messages
@@ -536,11 +536,11 @@ vpcs:
         priority: 101
 
     networkAcls:
-      - name: Portal-Production-Public-ACL
+      - name: SomeEnv-Production-Public-ACL
         subnetAssociations:
-          - Portal-Production-Public-A
-          - Portal-Production-Public-B
-          - Portal-Production-Public-C
+          - SomeEnv-Production-Public-A
+          - SomeEnv-Production-Public-B
+          - SomeEnv-Production-Public-C
         inboundRules:
           - rule: 100
             protocol: 6
@@ -587,10 +587,10 @@ vpcs:
             destination: 0.0.0.0/0
         tags:
           - key: Name
-            value: Portal-Production-Public-ACL
+            value: SomeEnv-Production-Public-ACL
 
     routeTables:
-      - name: Portal-Production-Private-A
+      - name: SomeEnv-Production-Private-A
         routes:
           - name: TgwRoute
             destination: 0.0.0.0/0
@@ -602,7 +602,7 @@ vpcs:
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: Portal-Production-Private-B
+      - name: SomeEnv-Production-Private-B
         routes:
           - name: TgwRoute
             destination: 0.0.0.0/0
@@ -614,7 +614,7 @@ vpcs:
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: Portal-Production-Private-C
+      - name: SomeEnv-Production-Private-C
         routes:
           - name: TgwRoute
             destination: 0.0.0.0/0
@@ -626,19 +626,19 @@ vpcs:
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: Portal-Production-Public-A
+      - name: SomeEnv-Production-Public-A
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: Portal-Production-Public-B
+      - name: SomeEnv-Production-Public-B
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: Portal-Production-Public-C
+      - name: SomeEnv-Production-Public-C
         routes:
           - name: IGW
             destination: 0.0.0.0/0
@@ -646,33 +646,33 @@ vpcs:
             target: IGW
 
     subnets:
-      - name: Portal-Production-Private-A
+      - name: SomeEnv-Production-Private-A
         availabilityZone: a
-        routeTable: Portal-Production-Private-A
-        ipv4CidrBlock: {{ PortalProductionPrivateAzACidr }}
-      - name: Portal-Production-Private-B
+        routeTable: SomeEnv-Production-Private-A
+        ipv4CidrBlock: {{ SomeEnvProductionPrivateAzACidr }}
+      - name: SomeEnv-Production-Private-B
         availabilityZone: b
-        routeTable: Portal-Production-Private-B
-        ipv4CidrBlock: {{ PortalProductionPrivateAzBCidr }}
-      - name: Portal-Production-Private-C
+        routeTable: SomeEnv-Production-Private-B
+        ipv4CidrBlock: {{ SomeEnvProductionPrivateAzBCidr }}
+      - name: SomeEnv-Production-Private-C
         availabilityZone: c
-        routeTable: Portal-Production-Private-C
-        ipv4CidrBlock: {{ PortalProductionPrivateAzCCidr }}
-      - name: Portal-Production-Public-A
+        routeTable: SomeEnv-Production-Private-C
+        ipv4CidrBlock: {{ SomeEnvProductionPrivateAzCCidr }}
+      - name: SomeEnv-Production-Public-A
         availabilityZone: a
-        routeTable: Portal-Production-Public-A
-        ipv4CidrBlock: {{ PortalProductionPublicAzACidr }}
-      - name: Portal-Production-Public-B
+        routeTable: SomeEnv-Production-Public-A
+        ipv4CidrBlock: {{ SomeEnvProductionPublicAzACidr }}
+      - name: SomeEnv-Production-Public-B
         availabilityZone: b
-        routeTable: Portal-Production-Public-B
-        ipv4CidrBlock: {{ PortalProductionPublicAzBCidr }}
-      - name: Portal-Production-Public-C
+        routeTable: SomeEnv-Production-Public-B
+        ipv4CidrBlock: {{ SomeEnvProductionPublicAzBCidr }}
+      - name: SomeEnv-Production-Public-C
         availabilityZone: c
-        routeTable: Portal-Production-Public-C
-        ipv4CidrBlock: {{ PortalProductionPublicAzCCidr }}
+        routeTable: SomeEnv-Production-Public-C
+        ipv4CidrBlock: {{ SomeEnvProductionPublicAzCCidr }}
 
     transitGatewayAttachments:
-      - name: Portal-Production
+      - name: SomeEnv-Production
         transitGateway:
           name: Network-Main
           account: Network
@@ -682,9 +682,9 @@ vpcs:
           - Network-Main-Core
           - Network-Main-Production
         subnets:
-          - Portal-Production-Private-A
-          - Portal-Production-Private-B
-          - Portal-Production-Private-C
+          - SomeEnv-Production-Private-A
+          - SomeEnv-Production-Private-B
+          - SomeEnv-Production-Private-C
 
 vpcFlowLogs:
   trafficType: ALL
@@ -728,11 +728,11 @@ vpcFlowLogs:
 
 
 vpcTemplates:
-  - name: CustomerVPC
+  - name: DataPlatfomVPC
     region: {{ AcceleratorHomeRegion }}
     deploymentTargets:
       organizationalUnits:
-        - Customer/Accounts
+        - DataPlatfom/Accounts
     useCentralEndpoints: false
     ipamAllocations:
       - ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
@@ -742,55 +742,55 @@ vpcTemplates:
     enableDnsSupport: true
     instanceTenancy: default
     routeTables:
-      - name: CustomerVPC-Public-RouteTable-A
+      - name: DataPlatfomVPC-Public-RouteTable-A
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: CustomerVPC-Public-RouteTable-B
+      - name: DataPlatfomVPC-Public-RouteTable-B
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
-      - name: CustomerVPC-Public-RouteTable-C
+      - name: DataPlatfomVPC-Public-RouteTable-C
         routes:
           - name: IGW
             destination: 0.0.0.0/0
             type: internetGateway
             target: IGW
 
-      - name: CustomerVPC-Private-RouteTable-A
+      - name: DataPlatfomVPC-Private-RouteTable-A
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-A
+            target: Nat-DataPlatfomVPC-Public-A
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: CustomerVPC-Private-RouteTable-B
+      - name: DataPlatfomVPC-Private-RouteTable-B
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-B
+            target: Nat-DataPlatfomVPC-Public-B
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
           - name: DynamoDBGateway
             type: gatewayEndpoint
             target: dynamodb
-      - name: CustomerVPC-Private-RouteTable-C
+      - name: DataPlatfomVPC-Private-RouteTable-C
         routes:
           - name: NatRoute
             destination: 0.0.0.0/0
             type: natGateway
-            target: Nat-CustomerVPC-Public-C
+            target: Nat-DataPlatfomVPC-Public-C
           - name: S3Gateway
             type: gatewayEndpoint
             target: s3
@@ -799,50 +799,50 @@ vpcTemplates:
             target: dynamodb
 
     subnets:
-      - name: CustomerVPC-Public-Subnet-A
+      - name: DataPlatfomVPC-Public-Subnet-A
         availabilityZone: a
-        routeTable: CustomerVPC-Public-RouteTable-A
+        routeTable: DataPlatfomVPC-Public-RouteTable-A
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Public-Subnet-B
+      - name: DataPlatfomVPC-Public-Subnet-B
         availabilityZone: b
-        routeTable: CustomerVPC-Public-RouteTable-B
+        routeTable: DataPlatfomVPC-Public-RouteTable-B
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Public-Subnet-C
+      - name: DataPlatfomVPC-Public-Subnet-C
         availabilityZone: c
-        routeTable: CustomerVPC-Public-RouteTable-C
+        routeTable: DataPlatfomVPC-Public-RouteTable-C
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-A
+      - name: DataPlatfomVPC-Private-Subnet-A
         availabilityZone: a
-        routeTable: CustomerVPC-Private-RouteTable-A
+        routeTable: DataPlatfomVPC-Private-RouteTable-A
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-B
+      - name: DataPlatfomVPC-Private-Subnet-B
         availabilityZone: b
-        routeTable: CustomerVPC-Private-RouteTable-B
+        routeTable: DataPlatfomVPC-Private-RouteTable-B
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
-      - name: CustomerVPC-Private-Subnet-C
+      - name: DataPlatfomVPC-Private-Subnet-C
         availabilityZone: c
-        routeTable: CustomerVPC-Private-RouteTable-C
+        routeTable: DataPlatfomVPC-Private-RouteTable-C
         ipamAllocation:
           ipamPoolName: "{{ AcceleratorPrefix }}-customer-pool"
           netmaskLength: 27
 
     natGateways:
-      - name: Nat-CustomerVPC-Public-A
-        subnet: CustomerVPC-Public-Subnet-A
-      - name: Nat-CustomerVPC-Public-B
-        subnet: CustomerVPC-Public-Subnet-B
-      - name: Nat-CustomerVPC-Public-C
-        subnet: CustomerVPC-Public-Subnet-C
+      - name: Nat-DataPlatfomVPC-Public-A
+        subnet: DataPlatfomVPC-Public-Subnet-A
+      - name: Nat-DataPlatfomVPC-Public-B
+        subnet: DataPlatfomVPC-Public-Subnet-B
+      - name: Nat-DataPlatfomVPC-Public-C
+        subnet: DataPlatfomVPC-Public-Subnet-C
     gatewayEndpoints:
       defaultPolicy: Default
       endpoints:
@@ -852,9 +852,9 @@ vpcTemplates:
       central: false
       defaultPolicy: Default
       subnets:
-        - CustomerVPC-Private-Subnet-A
-        - CustomerVPC-Private-Subnet-B
-        - CustomerVPC-Private-Subnet-C
+        - DataPlatfomVPC-Private-Subnet-A
+        - DataPlatfomVPC-Private-Subnet-B
+        - DataPlatfomVPC-Private-Subnet-C
       endpoints:
         - service: ec2
         - service: ec2messages
@@ -875,6 +875,6 @@ prefixLists:
     deploymentTargets:
       organizationalUnits:
         - Infrastructure
-        - Portal/Development
-        - Portal/Staging
-        - Portal/Production
+        - SomeEnv/Development
+        - SomeEnv/Staging
+        - SomeEnv/Production

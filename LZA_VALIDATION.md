@@ -56,3 +56,42 @@ python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
 2. **Control Tower Landing Zone Status**: Verifies that AWS Control Tower is enabled and that the Landing Zone status is `ACTIVE`. It also warns if the Landing Zone is drifted (`DRIFTED`) or not up-to-date with the latest version.
 
 Running these checks locally helps you identify potential issues that would cause your deployment to fail, saving time and reducing frustration during the deployment process.
+
+## Schema Validation
+
+Validate your LZA configuration files against the official JSON schemas to ensure they follow the correct structure and contain valid properties:
+
+```bash
+# Run schema validation against the latest schema
+python scripts/validate_landing_zone_schema.py
+
+# Run schema validation against a specific version
+python scripts/validate_landing_zone_schema.py --version v1.5.0
+```
+
+The schema validator:
+
+1. **Fetches official schemas**: Downloads the JSON schemas from the LZA GitHub repository
+2. **Processes replacements**: Applies any variables defined in your replacements-config.yaml
+3. **Validates each config file**: Checks all configuration files against their respective schemas
+
+### Using Schema from SchemaStore
+
+You can also validate against schemas from SchemaStore.org:
+
+```bash
+# Set environment variable to use SchemaStore (uses latest schema)
+export LZA_SCHEMA_SOURCE="schemastore"
+
+# Run validation
+python scripts/validate_landing_zone_schema.py
+```
+
+If you need to pin to a specific schema version, set the appropriate environment variable in your CI/CD pipeline or preflight.yml file:
+
+```yaml
+# In preflight.yml
+env:
+  LZA_SCHEMA_SOURCE: "schemastore"
+  LZA_SCHEMA_VERSION: "v1.5.0"  # Optional: pin to specific version
+```

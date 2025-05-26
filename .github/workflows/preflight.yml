@@ -48,8 +48,11 @@ jobs:
           cfn-lint config/customizations/*.yaml
 
       - name: Validate Landing Zone Accelerator config files
+        env:
+          LZA_SCHEMA_SOURCE: ${{ vars.LZA_SCHEMA_SOURCE || 'github' }}
+          LZA_SCHEMA_VERSION: ${{ vars.LZA_SCHEMA_VERSION || 'main' }}
         run: |
-          python scripts/validate_landing_zone_schema.py --version main --config-dir config
+          python scripts/validate_landing_zone_schema.py --version "$LZA_SCHEMA_VERSION" --config-dir config --schema-source "$LZA_SCHEMA_SOURCE"
           echo "Landing Zone Accelerator config files are valid."
 
       - name: Lint YAML files

@@ -2,7 +2,7 @@ globalReplacements:
   # Accelerator Prefix
   - key: AcceleratorPrefix
     type: String
-    value: testlz
+    value: lza
   # Home Region
   - key: AcceleratorHomeRegion
     type: String
@@ -10,20 +10,20 @@ globalReplacements:
   # Security notification emails
   - key: SecurityHigh
     type: String
-    value: bjsslztest+new-securityhigh@gmail.com
+    value: someexamplelztest+new-securityhigh@gmail.com
   - key: SecurityMedium
     type: String
-    value: bjsslztest+new-securitymedium@gmail.com
+    value: someexamplelztest+new-securitymedium@gmail.com
   - key: SecurityLow
     type: String
-    value: bjsslztest+new-securitylow@gmail.com
+    value: someexamplelztest+new-securitylow@gmail.com
   - key: SecurityIgnore
     type: String
-    value: bjsslztest+new-securityignore@gmail.com
+    value: someexamplelztest+new-securityignore@gmail.com
   # Budget notification emails
   #- key: BudgetEmail
   #  type: String
-  #  value: bjsslztest+new-budget@gmail.com
+  #  value: someexamplelztest+new-budget@gmail.com
   # Name of CloudWatch log group that centralizes CloudTrail logs. Referenced by CloudWatch metrics and alarms
   #- key: CloudTrailLogGroup
   #  type: String
@@ -32,25 +32,28 @@ globalReplacements:
   # High level ranges
   - key: AwsCidr
     type: String
-    value: 10.128.0.0/10
+    value: 172.16.0.0/12
   - key: CoreCidr
     type: String
-    value: 10.128.0.0/14
-  - key: PortalCidr
+    value: 172.16.0.0/16
+  - key: SomeEnvCidr
     type: String
-    value: 10.132.0.0/15
-  - key: PortalProductionCidr
+    value: 172.18.0.0/15
+  - key: SomeEnvProductionCidr
     type: String
     value: 192.168.0.0/24
-  - key: PortalStagingCidr
+  - key: SomeEnvStagingCidr
     type: String
     value: 192.168.1.0/24
+  - key: SomeEnvDevelopmentCidr
+    type: String
+    value: 192.168.2.0/24
   # - key: WorkloadInfrastructureCidr
   #  type: String
   #  value: 10.134.0.0/15
-  - key: CustomerCidr
+  - key: DataPlatfomCidr
     type: String
-    value: 10.136.0.0/13
+    value: 172.24.0.0/13
   #  - key: OutsideAwsCidr
   #    type: String
   #    value: 10.0.0.0/9
@@ -59,113 +62,59 @@ globalReplacements:
   #   value: 10.192.0.0/10
   - key: CentralEgressCidr
     type: String
-    value: 10.128.0.0/18
+    value: 172.16.0.0/18
   - key: CentralEgressTgwAzACidr
     type: String
-    value: 10.128.0.0/24
+    value: 172.16.0.0/24
   - key: CentralEgressTgwAzBCidr
     type: String
-    value: 10.128.1.0/24
+    value: 172.16.1.0/24
   - key: CentralEgressTgwAzCCidr
     type: String
-    value: 10.128.2.0/24
+    value: 172.16.2.0/24
   - key: CentralEgressNFAzACidr
     type: String
-    value: 10.128.4.0/24
+    value: 172.16.4.0/24
   - key: CentralEgressNFAzBCidr
     type: String
-    value: 10.128.5.0/24
+    value: 172.16.5.0/24
   - key: CentralEgressNFAzCCidr
     type: String
-    value: 10.128.6.0/24
+    value: 172.16.6.0/24
   - key: CentralEgressOutboundAzACidr
     type: String
-    value: 10.128.8.0/24
+    value: 172.16.8.0/24
   - key: CentralEgressOutboundAzBCidr
     type: String
-    value: 10.128.9.0/24
+    value: 172.16.9.0/24
   - key: CentralEgressOutboundAzCCidr
     type: String
-    value: 10.128.10.0/24
+    value: 172.16.10.0/24
   - key: OnPremisesPrefixList
     type: String
-    value: 10.0.0.0/9
-  # Portal Development
-  - key: PortalDevelopmentCidr
+    value: 172.0.0.0/8
+  # SomeEnv Production
+  - key: SomeEnvProductionCidr
     type: String
-    value: 10.132.0.0/18
-  #  - key: PortalDevelopmentPublicCidr
-  #    type: String
-  #    value: 10.132.0.0/24
-  - key: PortalDevelopmentPublicAzACidr
+    value: 172.20.0.0/18
+  - key: SomeEnvProductionPublicAzACidr
     type: String
-    value: 10.132.0.0/26
-  - key: PortalDevelopmentPublicAzBCidr
+    value: 172.20.0.0/26
+  - key: SomeEnvProductionPublicAzBCidr
     type: String
-    value: 10.132.0.64/26
-  - key: PortalDevelopmentPublicAzCCidr
+    value: 172.20.0.64/26
+  - key: SomeEnvProductionPublicAzCCidr
     type: String
-    value: 10.132.0.128/26
-  #   Unallocated  from 10.132.1.0/24 -> 10.132.31.0/24
-  #  - key: PortalDevelopmentPrivateCidr
-  #    type: String
-  #    value: 10.132.32.0/19
-  - key: PortalDevelopmentPrivateAzACidr
-    type: String
-    value: 10.132.32.0/21
-  - key: PortalDevelopmentPrivateAzBCidr
-    type: String
-    value: 10.132.40.0/21
-  - key: PortalDevelopmentPrivateAzCCidr
-    type: String
-    value: 10.132.48.0/21
-  # Portal Staging
-  - key: PortalStagingCidr
-    type: String
-    value: 10.132.64.0/18
-  - key: PortalStagingPublicAzACidr
-    type: String
-    value: 10.132.64.0/26
-  - key: PortalStagingPublicAzBCidr
-    type: String
-    value: 10.132.64.64/26
-  - key: PortalStagingPublicAzCCidr
-    type: String
-    value: 10.132.64.128/26
-  #  - key: PortalStagingPrivateCidr
-  #    type: String
-  #    value: 10.132.96.0/19
-  - key: PortalStagingPrivateAzACidr
-    type: String
-    value: 10.132.96.0/21
-  - key: PortalStagingPrivateAzBCidr
-    type: String
-    value: 10.132.104.0/21
-  - key: PortalStagingPrivateAzCCidr
-    type: String
-    value: 10.132.112.0/21
-  # Portal Production
-  - key: PortalProductionCidr
-    type: String
-    value: 10.132.128.0/18
-  - key: PortalProductionPublicAzACidr
-    type: String
-    value: 10.132.128.0/26
-  - key: PortalProductionPublicAzBCidr
-    type: String
-    value: 10.132.128.64/26
-  - key: PortalProductionPublicAzCCidr
-    type: String
-    value: 10.132.128.128/26
-  #  - key: PortalProductionPrivateCidr
+    value: 172.20.0.128/26
+  #  - key: SomeEnvProductionPrivateCidr
   #    type: String
   #    value: 10.132.160.0/19
-  - key: PortalProductionPrivateAzACidr
+  - key: SomeEnvProductionPrivateAzACidr
     type: String
-    value: 10.132.160.0/21
-  - key: PortalProductionPrivateAzBCidr
+    value: 172.20.8.0/21
+  - key: SomeEnvProductionPrivateAzBCidr
     type: String
-    value: 10.132.168.0/21
-  - key: PortalProductionPrivateAzCCidr
+    value: 172.20.16.0/21
+  - key: SomeEnvProductionPrivateAzCCidr
     type: String
-    value: 10.132.176.0/21
+    value: 172.20.24.0/21

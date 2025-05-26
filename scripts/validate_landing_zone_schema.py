@@ -28,7 +28,11 @@ CONFIG_SCHEMAS = {
     "security-config.yaml": "security-config.json"
 }
 
-BASE_URL = "https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/{}/source/packages/@aws-accelerator/config/lib/schemas/{}"
+# GitHub schema URL
+GITHUB_BASE_URL = "https://raw.githubusercontent.com/awslabs/landing-zone-accelerator-on-aws/{}/source/packages/@aws-accelerator/config/lib/schemas/{}"
+
+# SchemaStore URL
+SCHEMASTORE_BASE_URL = "https://www.schemastore.org/api/json/schema/landing-zone-accelerator-on-aws/{}"
 
 def load_yaml_file(file_path):
     """Load YAML file and return its contents."""
@@ -39,10 +43,15 @@ def load_yaml_file(file_path):
         print(f"Error loading YAML file {file_path}: {str(e)}")
         return None
 
-def fetch_schema(schema_name, version):
-    """Fetch JSON schema from GitHub."""
-    url = BASE_URL.format(version, schema_name)
+def fetch_schema(schema_name, version, schema_source="github"):
+    """Fetch JSON schema from GitHub or SchemaStore."""
+    if schema_source.lower() == "schemastore":
+        url = SCHEMASTORE_BASE_URL.format(schema_name)
+    else:  # Default to GitHub
+        url = GITHUB_BASE_URL.format(version, schema_name)
+    
     try:
+        print(f"Fetching schema from {url}")
         response = requests.get(url)
         response.raise_for_status()
         return response.json()
@@ -110,6 +119,8 @@ def main():
     parser = argparse.ArgumentParser(description="Validate Landing Zone Accelerator configuration files against schemas")
     parser.add_argument("--version", default="main", help="Landing Zone Accelerator version/branch/commit to use for schemas")
     parser.add_argument("--config-dir", default="config", help="Directory containing configuration files")
+    parser.add_argument("--schema-source", default=os.environ.get("LZA_SCHEMA_SOURCE", "github"), 
+                        help="Source for schemas: 'github' or 'schemastore'")
     args = parser.parse_args()
 
     # Create temporary directory
@@ -142,7 +153,7 @@ def main():
                 all_valid = False
                 continue
                 
-            schema_data = fetch_schema(schema_file, args.version)
+            schema_data = fetch_schema(schema_file, args.version, args.schema_source)
             if not schema_data:
                 all_valid = False
                 continue

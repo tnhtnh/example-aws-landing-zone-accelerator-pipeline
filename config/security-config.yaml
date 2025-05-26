@@ -88,8 +88,8 @@ awsConfig:
         organizationalUnits:
           - Security
           - Infrastructure
-          - Portal
-          - Customer
+          - SomeEnv
+          - DataPlatfom
         accounts:
           - Management
       rules:

@@ -2,16 +2,16 @@ providers: []
 policySets:
   - deploymentTargets:
       organizationalUnits:
-        - Portal
-        - Customer
+        - SomeEnv
+        - DataPlatfom
     policies:
       - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
         policy: iam-policies/ci-role-developer-boundary-policy.json
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Infrastructure
-        - Customer
+        - DataPlatfom
         - Security
     policies:
       - name: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
@@ -26,8 +26,8 @@ policySets:
 roleSets:
   - deploymentTargets:
       organizationalUnits:
-        - Portal
-        - Customer
+        - SomeEnv
+        - DataPlatfom
     roles:
       - name: CI-Role-Developer
         assumedBy:
@@ -39,9 +39,9 @@ roleSets:
         boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
   - deploymentTargets:
       organizationalUnits:
-        - Portal
+        - SomeEnv
         - Infrastructure
-        - Customer
+        - DataPlatfom
         - Security
     roles:
       - name: CI-Role-PlatformEngineer

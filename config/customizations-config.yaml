@@ -4,9 +4,9 @@ customizations:
         - CAPABILITY_IAM
       deploymentTargets:
         organizationalUnits:
-          - Portal/Development
-          - Portal/Staging
-          - Portal/Production
+          - SomeEnv/Development
+          - SomeEnv/Staging
+          - SomeEnv/Production
       regions:
         - ap-southeast-2
       template: customizations/github-oicd-provider.yaml
@@ -17,9 +17,9 @@ customizations:
       name: github-tnhtnh-container-pipeline-sydney-summit-2025
       deploymentTargets:
         organizationalUnits:
-          - Portal/Development
-          - Portal/Staging
-          - Portal/Production
+          - SomeEnv/Development
+          - SomeEnv/Staging
+          - SomeEnv/Production
       regions:
         - ap-southeast-2
       runOrder: 1

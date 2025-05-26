@@ -2,7 +2,7 @@
 
 This repository manages the configuration files for deploying an AWS environment using the [Landing Zone Accelerator on AWS (LZA)](https://aws.amazon.com/solutions/implementations/landing-zone-accelerator-on-aws/). It utilizes a GitHub Actions workflow for validation and automated deployment.
 
-New to this repository? Check out the [Getting Started Guide](GETTING_STARTED.md) for step-by-step instructions on initial setup.
+Wanting to deploy a new Landing Zone? Check out the [Getting Started Guide](GETTING_STARTED.md) for step-by-step instructions on initial setup.
 
 ## Purpose
 
@@ -54,8 +54,8 @@ graph TD
 
 The workflow runs on:
 
-1.  **Push:** To `main` or any branch when files in `config/`, `schema.yaml`, or the workflow file itself are changed.
-2.  **Pull Request:** Targeting the `main` branch when files in `config/`, `schema.yaml`, or the workflow file are changed.
+1.  **Push:** To `main` or any branch when files in `config/`, or the workflow file itself are changed. For instance, after merging a Pull Requst.
+2.  **Pull Request:** Targeting the `main` branch when files in `config/`, or the workflow file are changed.
 3.  **Manual Trigger (`workflow_dispatch`):** Allows running the workflow manually via the GitHub Actions UI.
     *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped. **Only use when `AWS ControlTower` is in an unknown state and re-executing this pipeline will address the issue.**
 
@@ -67,13 +67,13 @@ The `deploy` job requires the following variables (`Settings > Secrets and varia
 | Name | Type | Description |
 |------|------|-------------|
 | `AWS_OIDC_ROLE_ARN` | Secret | ARN of the IAM Role for GitHub Actions OIDC authentication. Must have permissions for S3 upload, CodePipeline start, and the preflight check actions (e.g., `cloudformation:ListStacks`, `controltower:ListLandingZones`, `controltower:GetLandingZone`). |
+| `S3_BUCKET` | Secret | Name of the LZA configuration S3 bucket where the zip configuration files are stored. |
 | `AWS_REGION` | Environment | AWS region where LZA Home Resources (CodePipeline, S3 bucket) reside. |
-| `S3_BUCKET` | Environment | Name of the LZA configuration S3 bucket. |
 | `S3_KEY_PREFIX` | Environment | (Optional) Prefix within the S3 bucket for the zip file. |
 | `CODEPIPELINE_NAME` | Environment | Name of the LZA CodePipeline to trigger. |
 | `LZA_STACK_PREFIX` | Environment | Prefix used for LZA CloudFormation stacks (required for preflight check script). |
 
-Note: Only `AWS_OIDC_ROLE_ARN` needs to be added as a secret variable. All other variables should be added as environment variables.
+Note: Only `AWS_OIDC_ROLE_ARN` and `S3_BUCKET` needs to be added as a secret variable. All other variables should be added as environment variables.
 
 ## Usage
 
@@ -127,73 +127,6 @@ For detailed instructions on validating your LZA configuration locally before de
 └── README.md                 # This file
 ```
 
-## Prerequisites
-
-*   Python 3.11+
-*   AWS Credentials configured (e.g., via environment variables, IAM role, OIDC) with necessary permissions:
-    *   `cloudformation:ListStacks`
-    *   `controltower:ListLandingZones`
-    *   `controltower:GetLandingZone`
-    *   `s3:PutObject` (for CI/CD pipeline)
-    *   `codepipeline:StartPipelineExecution` (for CI/CD pipeline)
-
-## Usage
-
-### Local Execution
-
-1.  **Install Dependencies:**
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate # or .venv\Scripts\activate on Windows
-    pip install -r requirements.txt
-    ```
-
-2.  **Configure AWS Credentials:** Ensure your environment is configured with valid AWS credentials (e.g., set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, or use an instance profile/role).
-
-3.  **Set Environment Variables (Optional):**
-    *   `AWS_REGION`: (Required) The AWS region to run the checks in (e.g., `us-east-1`, `eu-west-2`). This is used for the CloudFormation check and as the default for the Control Tower check.
-    *   `CT_HOME_REGION`: (Optional) The AWS region where your Control Tower Landing Zone is homed. Defaults to the value of `AWS_REGION` if not set. Required if your Control Tower home region differs from the `AWS_REGION` you want to check CloudFormation stacks in.
-    *   `STACK_PREFIX`: (Optional) The prefix for CloudFormation stacks to check for failures. Defaults to `AWSAccelerator`.
-
-4.  **Run Checks:**
-    ```bash
-    # Example:
-    export AWS_REGION="eu-west-1"
-    # export CT_HOME_REGION="us-east-1" # If different
-    # export STACK_PREFIX="MyProject-" # If different
-
-    python -m preflight_checks.aws_checks
-    ```
-    The script will exit with code `0` if all checks pass, and `1` if any check fails or an error occurs.
-
-### GitHub Actions
-
-The `.github/workflows/preflight.yml` workflow automates these checks, typically on pull requests or manually via `workflow_dispatch`.
-
-*   **Authentication:** Uses AWS OIDC for secure, short-lived credentials. You need to configure an IAM Role in your AWS account with the necessary permissions and establish a trust relationship with GitHub Actions.
-*   **Configuration:**
-    *   Update the `role-to-assume` parameter in the workflow file with the ARN of your IAM role.
-    *   The `AWS_REGION` and `CT_HOME_REGION` are set as environment variables in the workflow. You can modify these defaults.
-    *   The `STACK_PREFIX` can be overridden using GitHub repository secrets or variables (see commented-out examples in the workflow file).
-
-## Running Tests
-
-Unit tests using `pytest` and `moto` are included.
-
-1.  **Install Test Dependencies (if not already done):**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-2.  **Run Tests with Coverage:**
-    ```bash
-    pytest tests/ --cov=preflight_checks --cov-report=term-missing
-    ```
-
-    To generate an XML coverage report (e.g., for CI integration):
-    ```bash
-    pytest tests/ --cov=preflight_checks --cov-report=xml
-    ```
 
 ## Future Enhancements
 
