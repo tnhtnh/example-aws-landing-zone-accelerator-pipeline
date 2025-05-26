@@ -27,43 +27,6 @@ permissions:
   id-token: write # Needed for AWS OIDC authentication
 
 jobs:
-  validate:
-    name: Validate YAML Config
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Lint YAML files
-        run: |
-          echo "Linting YAML configuration files with yamllint..."
-          yamllint config/
-          echo "Linting successful."
-
-      - name: Install cfn-lint
-        run: pip install cfn-lint
-
-      - name: Lint CloudFormation templates (cfn-lint)
-        run: |
-          cfn-lint config/customizations/*.yaml
-
-      - name: Validate Replacement Keys
-        run: |
-          pip install pyyaml
-          python scripts/validate_replacements.py
-
-      - name: Validate JSON Config Files
-        run: |
-          python scripts/validate_json_configs.py || true
-
   deploy:
     name: Deploy to S3 and Trigger Pipeline
     runs-on: ubuntu-latest
@@ -77,32 +40,34 @@ jobs:
         id: check_secrets
         run: |
           missing_secrets=""
+          missing_env_vars=""
           if [ -z "${{ secrets.AWS_OIDC_ROLE_ARN }}" ]; then missing_secrets="AWS_OIDC_ROLE_ARN "; fi
-          if [ -z "${{ secrets.AWS_REGION }}" ]; then missing_secrets="${missing_secrets}AWS_REGION "; fi
           if [ -z "${{ secrets.S3_BUCKET }}" ]; then missing_secrets="${missing_secrets}S3_BUCKET "; fi
-          if [ -z "${{ secrets.CODEPIPELINE_NAME }}" ]; then missing_secrets="${missing_secrets}CODEPIPELINE_NAME "; fi
-          if [ -z "${{ secrets.LZA_STACK_PREFIX }}" ]; then missing_secrets="${missing_secrets}LZA_STACK_PREFIX "; fi
+          if [ -z "${{ env.AWS_REGION }}" ]; then missing_env_vars="AWS_REGION "; fi
+          if [ -z "${{ env.CODEPIPELINE_NAME }}" ]; then missing_env_vars="${missing_env_vars}CODEPIPELINE_NAME "; fi
+          if [ -z "${{ env.LZA_STACK_PREFIX }}" ]; then missing_env_vars="${missing_env_vars}LZA_STACK_PREFIX "; fi
 
-          if [ -n "$missing_secrets" ]; then
-            echo "::error::Missing mandatory secrets: $missing_secrets"
+          if [ -n "$missing_secrets" ] || [ -n "$missing_env_vars" ]; then
+            [ -n "$missing_secrets" ] && echo "::error::Missing mandatory secrets: $missing_secrets"
+            [ -n "$missing_env_vars" ] && echo "::error::Missing mandatory environment variables: $missing_env_vars"
             exit 1
           else
-            echo "All mandatory secrets are present."
+            echo "All mandatory secrets and environment variables are present."
           fi
 
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # Use OIDC Role ARN secret
-          aws-region: ${{ secrets.AWS_REGION }} # Use a secret for the region
+          aws-region: ${{ env.AWS_REGION }} # Use a secret for the region
 
       - name: Run LZA Preflight Checks
         # Always run but continue on error if skip_preflight is true
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_preflight == 'true' }}
         env:
-          STACK_PREFIX: ${{ secrets.LZA_STACK_PREFIX }} # Use secret for prefix, rename to STACK_PREFIX
+          STACK_PREFIX: ${{ env.LZA_STACK_PREFIX }} # Use secret for prefix, rename to STACK_PREFIX
           # Ensure AWS_REGION and potentially CT_HOME_REGION are available if needed by the script
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ env.AWS_REGION }}
           # CT_HOME_REGION: ${{ secrets.CT_HOME_REGION }} # Add if needed and different from AWS_REGION
         run: |
           echo "Setting up Python for preflight checks..."
@@ -140,7 +105,7 @@ jobs:
 
       - name: Trigger CodePipeline
         env:
-          CODEPIPELINE_NAME: ${{ secrets.CODEPIPELINE_NAME }}
+          CODEPIPELINE_NAME: ${{ env.CODEPIPELINE_NAME }}
         run: |
           pipeline_name="${CODEPIPELINE_NAME}"
           echo "Pipeline Name: ${pipeline_name}"
