@@ -37,8 +37,8 @@ This workflow automates the validation and deployment process.
 ```mermaid
 graph TD
     A[Feature Branch] -->|Push| B[Configuration Validation]
-    B -->|Success| C[Pull Request to master]
-    C -->|Merge| D[master branch]
+    B -->|Success| C[Pull Request to main]
+    C -->|Merge| D[Main branch]
     D -->|Push| E[Configuration Validation]
     E -->|Success| F[Preflight Checks]
     F -->|Pass| G[Zip Configuration]
@@ -54,8 +54,8 @@ graph TD
 
 The workflow runs on:
 
-1.  **Push:** To `master` or any branch when files in `config/`, `schema.yaml`, or the workflow file itself are changed.
-2.  **Pull Request:** Targeting the `master` branch when files in `config/`, `schema.yaml`, or the workflow file are changed.
+1.  **Push:** To `main` or any branch when files in `config/`, `schema.yaml`, or the workflow file itself are changed.
+2.  **Pull Request:** Targeting the `main` branch when files in `config/`, `schema.yaml`, or the workflow file are changed.
 3.  **Manual Trigger (`workflow_dispatch`):** Allows running the workflow manually via the GitHub Actions UI.
     *   **Input:** `skip_preflight` (boolean, default: `false`) - If set to `true` during a manual run, the preflight check step will be skipped. **Only use when `AWS ControlTower` is in an unknown state and re-executing this pipeline will address the issue.**
 
@@ -98,45 +98,13 @@ Note: Only `AWS_OIDC_ROLE_ARN` needs to be added as a secret variable. All other
 
 1.  **Modify Configuration:** Edit the YAML files in the `config/` directory.
 2.  **Commit & Push:** Commit changes to a feature branch and push.
-3.  **Pull Request:** Create a Pull Request targeting `master`. The `validate` job runs automatically.
-4.  **Merge:** After review and approval, merge the Pull Request into `master`.
+3.  **Pull Request:** Create a Pull Request targeting `main`. The `validate` job runs automatically.
+4.  **Merge:** After review and approval, merge the Pull Request into `main`.
 5.  **Deploy:** The merge triggers the `validate` and `deploy` jobs, uploading the configuration and starting the LZA CodePipeline.
 
-### Local Validation (Optional)
+### Validation
 
-You can validate YAML files locally before pushing:
-
-```bash
-# Install yamllint (if not already installed)
-pip install yamllint
-
-# Run linter
-yamllint config/
-```
-
-### Local Preflight Checks (Optional)
-
-You can run the preflight checks script locally:
-
-```bash
-# Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate # or .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure AWS credentials in your environment
-# (e.g., using environment variables or aws configure)
-
-# Set required environment variables
-export AWS_REGION="your-aws-region"
-# export CT_HOME_REGION="your-ct-home-region" # If different from AWS_REGION
-export LZA_STACK_PREFIX="your-lza-stack-prefix"
-
-# Run the script (adjust path if necessary)
-python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
-```
+For detailed instructions on validating your LZA configuration locally before deployment, see the [LZA Validation Guide](LZA_VALIDATION.md).
 
 ## Checks Performed
 
