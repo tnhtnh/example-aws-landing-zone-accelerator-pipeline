@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":enableVulnerabilityAlerts",
+    ":semanticCommits",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone"
+  ],
+  "timezone": "Australia/Sydney",
+  "schedule": ["at any time"],
+  
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "autoApprove": true,
+  
+  "dependencyDashboard": true,
+  "dependencyDashboardAutoclose": true,
+  
+  "rangeStrategy": "replace",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true
+    }
+  ],
+
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@tnh"]
+  },
+  
+  "lockFileMaintenance": {
+    "enabled": true,
+    "recreateWhen": "always",
+    "rebaseStalePrs": true,
+    "branchTopic": "lock-file-maintenance",
+    "commitMessageAction": "Lock file maintenance",
+    "commitMessageTopic": null,
+    "commitMessageExtra": null,
+    "schedule": ["at any time"],
+    "groupName": null,
+    "prBodyDefinitions": {"Change": "All locks refreshed"}
+  },
+  
+  "prCreation": "immediate",
+  "rebaseStalePrs": true,
+  "ignoreTests": false,
+  
+  "ignoreUnstable": true,
+  "separateMajorMinor": false,
+  "separateMinorPatch": false,
+  "respectLatest": false,
+  "assigneesFromCodeOwners": false,
+  "reviewersFromCodeOwners": false,
+  "ignoreReviewers": ["@tnh", "@amazon-q-developer"],
+  "assignees": []
+}

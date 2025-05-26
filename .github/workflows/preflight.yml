@@ -1,0 +1,71 @@
+# .github/workflows/preflight.yml
+name: Preflight check tests
+
+on:
+  push:
+    branches:
+      - "**"
+      - "!main" # All branches except main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  id-token: write # Required for AWS OIDC authentication
+  contents: read # Required to check out the code
+
+jobs:
+  preflight-code-tests:
+    runs-on: ubuntu-latest
+    env:
+      # Default check region (can be overridden by secrets/vars if needed)
+      AWS_REGION: "ap-southeast-2"
+      # Default Control Tower home region (assumed same as check region unless overridden)
+      # Use secrets or vars if it's different or sensitive
+      CT_HOME_REGION: "ap-southeast-2"
+      # Default CloudFormation stack prefix (can be overridden by secrets/vars)
+      # STACK_PREFIX: "AWSAccelerator" # Uses default from script if not set here
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11" # Or your preferred Python 3.9+ version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install cfn-lint
+          pip install yamllint
+
+      - name: Lint CloudFormation templates (cfn-lint)
+        run: |
+          cfn-lint config/customizations/*.yaml
+
+      - name: Validate Landing Zone Accelerator config files
+        env:
+          LZA_SCHEMA_SOURCE: ${{ vars.LZA_SCHEMA_SOURCE || 'github' }}
+          LZA_SCHEMA_VERSION: ${{ vars.LZA_SCHEMA_VERSION || 'main' }}
+        run: |
+          python scripts/validate_landing_zone_schema.py --version "$LZA_SCHEMA_VERSION" --config-dir config --schema-source "$LZA_SCHEMA_SOURCE"
+          echo "Landing Zone Accelerator config files are valid."
+
+      - name: Lint YAML files
+        run: |
+          echo "Linting YAML configuration files with yamllint..."
+          yamllint config/
+          echo "Linting successful."
+
+      - name: Validate Replacement Keys
+        run: |
+          pip install pyyaml
+          python scripts/validate_replacements.py
+
+      - name: Validate JSON Config Files
+        run: |
+          python scripts/validate_json_configs.py

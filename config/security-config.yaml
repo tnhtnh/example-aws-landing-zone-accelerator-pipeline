@@ -1,0 +1,106 @@
+centralSecurityServices:
+  delegatedAdminAccount: Audit
+  ebsDefaultVolumeEncryption:
+    enable: true
+    excludeRegions: []
+  s3PublicAccessBlock:
+    enable: true
+    excludeAccounts: []
+  scpRevertChangesConfig:
+    enable: true
+  macie:
+    enable: true
+    excludeRegions:
+      - ca-west-1 # does not support macie
+    policyFindingsPublishingFrequency: FIFTEEN_MINUTES
+    publishSensitiveDataFindings: true
+  guardduty:
+    enable: true
+    excludeRegions: []
+    s3Protection:
+      enable: true
+      excludeRegions: []
+    exportConfiguration:
+      enable: true
+      overrideExisting: false
+      destinationType: S3
+      exportFrequency: FIFTEEN_MINUTES
+  auditManager:
+    enable: true
+    excludeRegions:
+      - ca-west-1 # Does not support Audit Manager
+      - eu-west-3 # Does not support Audit Manager
+      - ap-northeast-2 # Does not support Audit Manager
+      - ap-northeast-3 # Does not support Audit Manager
+      - eu-north-1 # Does not support Audit Manager
+      - sa-east-1 # Does not support Audit Manager
+    defaultReportsConfiguration:
+      enable: true
+      destinationType: S3
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 1000
+        noncurrentVersionExpiration: 1000
+  securityHub:
+    enable: true
+    regionAggregation: true
+    excludeRegions: []
+    snsTopicName: SecurityHigh
+    notificationLevel: HIGH
+    standards:
+      - name: AWS Foundational Security Best Practices v1.0.0
+        enable: true
+        controlsToDisable:
+          - IAM.1
+          - EC2.10
+          - Lambda.4
+      - name: CIS AWS Foundations Benchmark v3.0.0
+        enable: true
+      - name: NIST Special Publication 800-53 Revision 5
+        enable: true
+      - name: PCI DSS v3.2.1
+        enable: false
+      - name: CIS AWS Foundations Benchmark v1.2.0
+        enable: false
+  ssmAutomation:
+    excludeRegions: []
+    documentSets: []
+accessAnalyzer:
+  enable: true
+iamPasswordPolicy:
+  allowUsersToChangePassword: true
+  hardExpiry: true
+  requireUppercaseCharacters: true
+  requireLowercaseCharacters: true
+  requireSymbols: true
+  requireNumbers: true
+  minimumPasswordLength: 14
+  passwordReusePrevention: 24
+  maxPasswordAge: 90
+awsConfig:
+  enableConfigurationRecorder: true
+  enableDeliveryChannel: true
+  ruleSets:
+    - deploymentTargets:
+        ##  Section for config rules across all OUs except Sandbox + Management Account
+        ## Rules not supported in ap-northeast-3 ONLY
+        organizationalUnits:
+          - Security
+          - Infrastructure
+          - SomeEnv
+          - DataPlatfom
+        accounts:
+          - Management
+      rules:
+        - name: "{{ AcceleratorPrefix }}-cloudtrail-security-trail-enabled"
+          identifier: CLOUDTRAIL_SECURITY_TRAIL_ENABLED
+          tags:
+            - key: Accelerator
+              value: '{{ AcceleratorPrefix }}'
+
+cloudWatch:
+  metricSets: []
+  alarmSets: []
+keyManagementService:
+  keySets: []

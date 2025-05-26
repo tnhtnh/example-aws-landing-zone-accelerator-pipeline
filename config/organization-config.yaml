@@ -1,0 +1,55 @@
+enable: true
+organizationalUnits:
+  - name: Security
+  - name: Infrastructure
+  - name: SomeEnv
+  - name: SomeEnv/Development
+  - name: SomeEnv/Staging
+  - name: SomeEnv/Production
+  - name: DataPlatfom
+  - name: DataPlatfom/Networking
+  - name: DataPlatfom/Accounts
+  - name: Sandbox
+  - name: Suspended
+    ignore: true
+quarantineNewAccounts:
+  enable: true
+  scpPolicyName: "{{ AcceleratorPrefix }}-Quarantine-New-Object"
+serviceControlPolicies:
+  - name: "{{ AcceleratorPrefix }}-Quarantine-New-Object"
+    description: >
+      LZA Quarantine policy - Apply to ACCOUNTS that need to be quarantined
+    policy: service-control-policies/Quarantine-New-Object.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits: []
+  - name: "{{ AcceleratorPrefix }}-DataPlatfom-Policy"
+    description: >
+      DataPlatfom resource policy - Apply to DataPlatfom accounts
+    policy: service-control-policies/DataPlatfom-Resource-Policy.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits: []
+  - name: "{{ AcceleratorPrefix }}-General-Workload-Policy"
+    description: >
+      General workload policy - Apply to all accounts
+    policy: service-control-policies/General-Workload-Policy.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits: []
+  - name: "{{ AcceleratorPrefix }}-AWS-Regions"
+    description: >
+      Regions we will operate in
+    policy: service-control-policies/AWS-Regions.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits: []
+taggingPolicies:
+  - name: TagPolicy
+    description: Organization Tagging Policy
+    policy: tagging-policies/org-tag-policy.json
+    deploymentTargets:
+      organizationalUnits:
+        - Root
+chatbotPolicies: []
+backupPolicies: []

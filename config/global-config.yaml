@@ -1,0 +1,83 @@
+homeRegion: ap-southeast-2
+enabledRegions:
+  - ap-southeast-2
+managementAccountAccessRole: AWSControlTowerExecution
+cloudwatchLogRetentionInDays: 3653
+cdkOptions:
+  centralizeBuckets: true
+  useManagementAccessRole: true
+terminationProtection: true
+enableOptInRegions: false
+controlTower:
+  enable: true
+  landingZone:
+    version: '3.3'
+    logging:
+      loggingBucketRetentionDays: 365
+      accessLoggingBucketRetentionDays: 3650
+      organizationTrail: true
+    security:
+      enableIdentityCenterAccess: true
+  controls: []
+logging:
+  account: LogArchive
+  cloudtrail:
+    enable: true
+    organizationTrail: true
+    organizationTrailSettings:
+      multiRegionTrail: true
+      globalServiceEvents: true
+      managementEvents: false # UPDATE If using ControlTower, set to False.
+      s3DataEvents: true
+      lambdaDataEvents: false
+      sendToCloudWatchLogs: true
+      apiErrorRateInsight: false
+      apiCallRateInsight: true
+    accountTrails:
+      - name: AccountTrail
+        regions:
+          - ap-southeast-2
+        deploymentTargets:
+          accounts: []
+          organizationalUnits: []
+        settings:
+          multiRegionTrail: true
+          globalServiceEvents: true
+          managementEvents: true
+          s3DataEvents: true
+          lambdaDataEvents: true
+          sendToCloudWatchLogs: true
+          apiErrorRateInsight: false
+          apiCallRateInsight: false
+  sessionManager:
+    sendToCloudWatchLogs: true
+    sendToS3: true
+    lifecycleRules:
+      - enabled: true
+        abortIncompleteMultipartUpload: 7
+        expiration: 730
+        noncurrentVersionExpiration: 730
+    attachPolicyToIamRoles: []
+    excludeAccounts:
+      - Management
+      - LogArchive
+      - Audit
+tags: []
+snsTopics:
+  deploymentTargets:
+    accounts:
+      - Management
+      - Audit
+  topics:
+    - name: SecurityHigh
+      emailAddresses:
+        - "{{ SecurityHigh }}"
+    - name: SecurityMedium
+      emailAddresses:
+        - "{{ SecurityMedium }}"
+    - name: SecurityLow
+      emailAddresses:
+        - "{{ SecurityLow }}"
+    - name: SecurityIgnore
+      emailAddresses:
+        - "{{ SecurityIgnore }}"

@@ -1,0 +1,32 @@
+{
+    "tags": {
+      "Owner": {
+        "tag_key": {
+          "@@assign": "Owner"
+        }
+      },
+      "System": {
+        "tag_key": {
+          "@@assign": "System"
+        }
+      },
+      "Component": {
+        "tag_key": {
+          "@@assign": "Component"
+        }
+      },
+      "DataClassification": {
+        "tag_key": {
+          "@@assign": "DataClassification"
+        },
+        "tag_value": {
+          "@@assign": [
+            "Public",
+            "Internal",
+            "Confidential",
+            "Restricted"
+          ]
+        }
+      }
+    }
+  }

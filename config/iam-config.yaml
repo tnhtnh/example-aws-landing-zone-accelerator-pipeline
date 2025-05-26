@@ -1,0 +1,59 @@
+providers: []
+policySets:
+  - deploymentTargets:
+      organizationalUnits:
+        - SomeEnv
+        - DataPlatfom
+    policies:
+      - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
+        policy: iam-policies/ci-role-developer-boundary-policy.json
+  - deploymentTargets:
+      organizationalUnits:
+        - SomeEnv
+        - Infrastructure
+        - DataPlatfom
+        - Security
+    policies:
+      - name: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
+        policy: iam-policies/ci-role-platform-engineer-boundary-policy.json
+  - deploymentTargets:
+      organizationalUnits:
+        - Root
+    identityCenterDependency: true
+    policies:
+      - name: LZ-BP-Deafult-Boundary-Policy
+        policy: iam-policies/default-sso-boundary-policy.json
+roleSets:
+  - deploymentTargets:
+      organizationalUnits:
+        - SomeEnv
+        - DataPlatfom
+    roles:
+      - name: CI-Role-Developer
+        assumedBy:
+          - type: service
+            principal: codebuild.amazonaws.com
+        policies:
+          awsManaged:
+            - PowerUserAccess
+        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
+  - deploymentTargets:
+      organizationalUnits:
+        - SomeEnv
+        - Infrastructure
+        - DataPlatfom
+        - Security
+    roles:
+      - name: CI-Role-PlatformEngineer
+        assumedBy:
+          - type: service
+            principal: codebuild.amazonaws.com
+        policies:
+          awsManaged:
+            - PowerUserAccess
+        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
+groupSets: []
+userSets: []
+identityCenter:
+  name: tnhtnhtnhexample
+  delegatedAdminAccount: Audit

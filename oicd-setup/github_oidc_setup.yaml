@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Sets up an AWS IAM OIDC Identity Provider for GitHub Actions and an IAM Role
+  that trusts the provider, scoped to a specific GitHub repository. This role
+  grants permissions needed for the LZA Config CI/CD workflow, including
+  preflight checks, S3 upload, and CodePipeline execution start.
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Description: Your GitHub organization or username (case-sensitive).
+    AllowedPattern: "[a-zA-Z0-9-]+"
+  GitHubRepo:
+    Type: String
+    Description: Your GitHub repository name (case-sensitive).
+    AllowedPattern: "[a-zA-Z0-9_.-]+"
+  LzaS3BucketName:
+    Type: String
+    Description: Name of the S3 bucket where the LZA configuration zip is uploaded.
+    AllowedPattern: "[a-z0-9.-]+"
+  LzaCodePipelineArn:
+    Type: String
+    Description: Full ARN of the LZA CodePipeline to be triggered by the workflow (e.g., arn:aws:codepipeline:us-east-1:123456789012:MyLzaPipeline).
+    AllowedPattern: "^arn:aws:codepipeline:[^:]+:[0-9]{12}:.+$"
+  KmsKeyArnForS3Encryption:
+    Type: String
+    Description: The full ARN of the KMS key used to encrypt the LZA S3 bucket.
+    AllowedPattern: "^arn:aws:kms:[^:]+:[0-9]{12}:key/.+$"
+  IamRoleName:
+    Type: String
+    Description: Name for the IAM Role to be created.
+    Default: GitHubActionsLzaDeployRole
+    AllowedPattern: "[a-zA-Z0-9+=,.@_-]+"
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      # Thumbprint obtained from GitHub docs (as of late 2023/early 2024)
+      # See: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#adding-the-identity-provider-to-aws
+      # Verify this thumbprint if AWS documentation changes.
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1 # SHA1 thumbprint for token.actions.githubusercontent.com
+
+  GitHubActionsLzaDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref IamRoleName
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref GitHubOidcProvider
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                "token.actions.githubusercontent.com:aud": sts.amazonaws.com
+              StringLike:
+                # Restrict to specific repository and branches/tags/etc.
+                # Use :ref:refs/heads/master for only master branch, or :* for any event
+                "token.actions.githubusercontent.com:sub": !Sub "repo:${GitHubOrg}/${GitHubRepo}:*"
+      Policies:
+        - PolicyName: LzaDeployWorkflowPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject # For uploading aws-accelerator-config.zip
+                Resource: !Sub "arn:aws:s3:::${LzaS3BucketName}/*" # Allow upload anywhere in bucket (incl. prefix)
+              - Effect: Allow # Grant KMS permission for S3 upload encryption
+                Action:
+                  - kms:GenerateDataKey
+                Resource: !Ref KmsKeyArnForS3Encryption
+              - Effect: Allow
+                Action:
+                  - codepipeline:StartPipelineExecution # For triggering LZA pipeline
+                Resource: !Ref LzaCodePipelineArn
+              - Effect: Allow # Permissions for Preflight Checks
+                Action:
+                  - cloudformation:ListStacks
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:DescribeStackSummary
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:DescribeStackSummary
+                Resource: "*" # These actions often require broad permissions or specific resource ARNs if available
+
+Outputs:
+  OidcRoleArn:
+    Description: The ARN of the created IAM Role for GitHub Actions OIDC. Use this in GitHub Secrets (AWS_OIDC_ROLE_ARN).
+    Value: !GetAtt GitHubActionsLzaDeployRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-GitHubOidcRoleArn" 
