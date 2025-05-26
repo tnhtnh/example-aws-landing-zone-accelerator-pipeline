@@ -41,6 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install cfn-lint
+          pip install yamllint
 
       - name: Lint CloudFormation templates (cfn-lint)
         run: |
@@ -50,10 +51,6 @@ jobs:
         run: |
           python scripts/validate_landing_zone_schema.py --version main --config-dir config
           echo "Landing Zone Accelerator config files are valid."
-
-      - name: Validate Landing Zone Accelerator config files  
-      - name: Install yamllint
-        run: pip install yamllint
 
       - name: Lint YAML files
         run: |
