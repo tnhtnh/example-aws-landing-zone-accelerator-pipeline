@@ -24,6 +24,8 @@ The `config/` directory contains the core YAML files defining your LZA environme
 *   `organization-config.yaml`: Defines OU structure, SCPs, tagging policies, etc.
 *   `security-config.yaml`: Configures central security services (GuardDuty, Security Hub, etc.).
 
+In addition, there are additional configuration items (for instance permission sets, Service Control Policies, AWS Config rules) depending on the configuration items in the core LZA configuration.
+
 Refer to the official [LZA Configuration Documentation](https://docs.aws.amazon.com/solutions/latest/landing-zone-accelerator-on-aws/configuration-files.html) for detailed schema information.
 
 ## CI/CD Workflow (`.github/workflows/lza_config_ci.yaml`)
@@ -149,24 +151,42 @@ python lza_preflight_check.py --prefix "$LZA_STACK_PREFIX"
 .
 ├── .github/
 │   └── workflows/
-│       └── preflight.yml  # GitHub Actions workflow
+│       ├── lza_config_ci.yaml  # CI/CD pipeline for LZA config
+│       └── preflight.yml       # Preflight check tests
+├── config/                    # Landing Zone Accelerator configuration
+│   ├── accounts-config.yaml
+│   ├── customizations-config.yaml
+│   ├── global-config.yaml
+│   ├── iam-config.yaml
+│   ├── network-config.yaml
+│   ├── organization-config.yaml
+│   ├── replacements-config.yaml
+│   ├── security-config.yaml
+│   └── customizations/        # Custom CloudFormation templates
+├── oicd-setup/                # OIDC setup for GitHub Actions
 ├── preflight_checks/
 │   ├── __init__.py
-│   └── aws_checks.py    # Core checking logic
+│   └── aws_checks.py         # Core checking logic
+├── scripts/
+│   ├── validate_json_configs.py
+│   ├── validate_landing_zone_schema.py
+│   └── validate_replacements.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_aws_checks.py # Unit tests
-├── requirements.txt       # Python dependencies
-└── README.md              # This file
+│   └── test_aws_checks.py    # Unit tests
+├── requirements.txt          # Python dependencies
+└── README.md                 # This file
 ```
 
 ## Prerequisites
 
-*   Python 3.9+
-*   AWS Credentials configured (e.g., via environment variables, IAM role) with necessary permissions:
+*   Python 3.11+
+*   AWS Credentials configured (e.g., via environment variables, IAM role, OIDC) with necessary permissions:
     *   `cloudformation:ListStacks`
     *   `controltower:ListLandingZones`
     *   `controltower:GetLandingZone`
+    *   `s3:PutObject` (for CI/CD pipeline)
+    *   `codepipeline:StartPipelineExecution` (for CI/CD pipeline)
 
 ## Usage
 

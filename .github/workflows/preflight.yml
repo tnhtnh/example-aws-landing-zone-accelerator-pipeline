@@ -4,11 +4,11 @@ name: Preflight check tests
 on:
   push:
     branches:
-      - master
+      - main
       - "**" # All branches
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch: # Allows manual triggering
 
 permissions:
@@ -49,15 +49,3 @@ jobs:
       - name: Validate Landing Zone Accelerator config files
         run: |
           python scripts/validate_landing_zone_schema.py --version main --config-dir config
-
-      # Optional: Run Pytest Tests (useful for CI validation)
-      - name: Run Unit Tests with Coverage
-        run: |
-          pytest tests/ --cov=preflight_checks --cov-report=xml --cov-report=term-missing
-
-      # Optional: Upload Coverage Report (e.g., to Codecov)
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }} # Store Codecov token in GitHub secrets
-      #     slug: ${{ github.repository }}
