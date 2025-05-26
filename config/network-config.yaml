@@ -20,7 +20,7 @@ transitGateways:
       organizationalUnits:
         - Infrastructure
         - Portal
-    bsn: 65521
+    asn: 65521
     dnsSupport: enable
     vpnEcmpSupport: enable
     defaultRouteTableAssociation: disable
