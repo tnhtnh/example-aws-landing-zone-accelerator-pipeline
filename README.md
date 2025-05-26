@@ -2,7 +2,7 @@
 
 This repository manages the configuration files for deploying an AWS environment using the [Landing Zone Accelerator on AWS (LZA)](https://aws.amazon.com/solutions/implementations/landing-zone-accelerator-on-aws/). It utilizes a GitHub Actions workflow for validation and automated deployment.
 
-New to this repository? Check out the [Getting Started Guide](GETTING_STARTED.md) for step-by-step instructions on initial setup.
+Wanting to deploy a new Landing Zone? Check out the [Getting Started Guide](GETTING_STARTED.md) for step-by-step instructions on initial setup.
 
 ## Purpose
 
