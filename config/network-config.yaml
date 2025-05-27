@@ -144,37 +144,12 @@ centralNetworkServices:
       operatingRegions:
         - ap-southeast-2
         - us-east-1
-        - us-west-1
-        - eu-central-1
-        - eu-west-2
       pools:
         ### Global Ipam Pools ###
         - name: "{{ AcceleratorPrefix }}-aws-pool"
           description: "Primary AWS IP Space."
           provisionedCidrs:
             - "{{ AwsCidr }}"
-        - name: "{{ AcceleratorPrefix }}-core-pool"
-          description: "Core IP Space."
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ CoreCidr }}"
-          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-        - name: "{{ AcceleratorPrefix }}-SomeEnv-pool"
-          description: "SomeEnv IP Space."
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ SomeEnvCidr }}"
-          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-        - name: "{{ AcceleratorPrefix }}-customer-pool"
-          description: "DataPlatfom IP Space."
-          locale: ap-southeast-2
-          provisionedCidrs:
-            - "{{ DataPlatfomCidr }}"
-          shareTargets:
-            organizationalUnits:
-              - DataPlatfom/Accounts
-          sourceIpamPool: "{{ AcceleratorPrefix }}-aws-pool"
-
   route53Resolver:
     endpoints: []
     queryLogs:

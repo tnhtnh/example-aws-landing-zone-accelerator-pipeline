@@ -3,19 +3,12 @@ policySets:
   - deploymentTargets:
       organizationalUnits:
         - SomeEnv
-        - DataPlatfom
-    policies:
-      - name: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
-        policy: iam-policies/ci-role-developer-boundary-policy.json
-  - deploymentTargets:
-      organizationalUnits:
-        - SomeEnv
         - Infrastructure
         - DataPlatfom
         - Security
     policies:
-      - name: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
-        policy: iam-policies/ci-role-platform-engineer-boundary-policy.json
+      - name: "{{ AcceleratorPrefix }}-CI-Role-Boundary-Policy"
+        policy: iam-policies/ci-role-boundary-policy.json
   - deploymentTargets:
       organizationalUnits:
         - Root
@@ -27,33 +20,20 @@ roleSets:
   - deploymentTargets:
       organizationalUnits:
         - SomeEnv
-        - DataPlatfom
-    roles:
-      - name: CI-Role-Developer
-        assumedBy:
-          - type: service
-            principal: codebuild.amazonaws.com
-        policies:
-          awsManaged:
-            - PowerUserAccess
-        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Developer-Boundary-Policy"
-  - deploymentTargets:
-      organizationalUnits:
-        - SomeEnv
         - Infrastructure
         - DataPlatfom
         - Security
     roles:
-      - name: CI-Role-PlatformEngineer
+      - name: CI-Role
         assumedBy:
           - type: service
             principal: codebuild.amazonaws.com
         policies:
           awsManaged:
             - PowerUserAccess
-        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-PlatformEngineer-Boundary-Policy"
+        boundaryPolicy: "{{ AcceleratorPrefix }}-CI-Role-Boundary-Policy"
 groupSets: []
 userSets: []
 identityCenter:
-  name: tnhtnhtnhexample
+  name: blahblahexample
   delegatedAdminAccount: Audit
