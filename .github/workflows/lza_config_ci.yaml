@@ -85,7 +85,7 @@ jobs:
           fi
 
       - name: Configure AWS Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # Use OIDC Role ARN secret
           aws-region: ${{ env.AWS_REGION }} # Use a secret for the region
