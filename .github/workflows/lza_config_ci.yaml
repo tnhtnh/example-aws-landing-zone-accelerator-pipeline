@@ -118,7 +118,7 @@ jobs:
           echo "Zip file created."
 
       - name: Upload Config Zip as Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: aws-accelerator-config
           path: aws-accelerator-config.zip
